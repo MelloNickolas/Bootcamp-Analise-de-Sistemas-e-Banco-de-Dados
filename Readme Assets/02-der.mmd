@@ -1,0 +1,55 @@
+erDiagram
+    LOCAL ||--o{ EVENTO_GRAVACAO : "recebe"
+    EVENTO_GRAVACAO ||--o{ RESERVA_EQUIPAMENTO : "tem"
+    EQUIPAMENTO ||--o{ RESERVA_EQUIPAMENTO : "e reservado em"
+    EVENTO_GRAVACAO |o--o{ VIDEO : "gera"
+    EVENTO_GRAVACAO ||--o{ NOTIFICACAO : "origina"
+    VIDEO ||--o{ NOTIFICACAO : "origina"
+
+    LOCAL {
+        int id PK
+        string nome
+        string endereco
+    }
+    EQUIPAMENTO {
+        int id PK
+        string nome
+        string descricao
+        bool ativo
+    }
+    EVENTO_GRAVACAO {
+        int id PK
+        string titulo
+        int local_id FK
+        timestamptz inicio
+        timestamptz fim
+        string status "agendado, realizado, cancelado"
+    }
+    RESERVA_EQUIPAMENTO {
+        int id PK
+        int evento_id FK
+        int equipamento_id FK
+        tstzrange periodo "sem sobreposicao por equipamento"
+    }
+    VIDEO {
+        int id PK
+        string titulo
+        int evento_id FK "opcional"
+        string status "a_editar, em_edicao, entregue"
+        timestamptz prazo_edicao
+        timestamptz prazo_entrega
+    }
+    NOTIFICACAO {
+        int id PK
+        int evento_id FK
+        int video_id FK
+        string tipo
+        timestamptz proximo_envio
+        bool repete
+        timestamptz confirmada_em
+    }
+    DISPOSITIVO {
+        int id PK
+        string token_fcm
+        string nome_aparelho
+    }
