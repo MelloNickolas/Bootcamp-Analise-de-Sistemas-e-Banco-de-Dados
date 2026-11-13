@@ -126,7 +126,7 @@ Dados de exemplo, com a câmera reservada em horários diferentes:
 
 | Pasta | Conteúdo |
 |---|---|
-| [`database/`](database/) | Scripts SQL: esquema, dados de exemplo e testes das regras |
+| [`database/`](database/) | Scripts SQL: esquema, dados de exemplo, testes das regras e consultas da agenda |
 | [`Readme Assets/`](Readme%20Assets/) | Imagens usadas neste README |
 | [`Relatórios de Entrega/`](Relatórios%20de%20Entrega/) | Relatórios do bootcamp e prints da conversa com a Tomodachi |
 
