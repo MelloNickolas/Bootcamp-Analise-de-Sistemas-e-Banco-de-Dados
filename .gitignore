@@ -1,0 +1,16 @@
+# Segredos e variáveis de ambiente (use o .env.example como modelo)
+.env
+.env.*
+!.env.example
+
+# .NET
+bin/
+obj/
+*.user
+.vs/
+
+# Editores e sistema
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store

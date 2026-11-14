@@ -122,19 +122,76 @@ Dados de exemplo, com a câmera reservada em horários diferentes:
 
 ---
 
+## 🔌 API
+
+API REST em **.NET 9**, em camadas, com **EF Core** mapeado nas tabelas criadas pelos scripts SQL (sem migrations). A documentação interativa fica em `/swagger`.
+
+```
+api/src/
+  Tomodachi.Domain       entidades e constantes de status
+  Tomodachi.Repository   DbContext, configurações do EF Core, repositórios e DTOs
+  Tomodachi.Application  regras de negócio
+  Tomodachi.Services     serviços auxiliares (login e notificações, em breve)
+  Tomodachi.API          controllers e Program.cs
+```
+
+Fluxo entre as camadas: `API → Application → Repository → Domain`.
+
+### Endpoints disponíveis
+
+| Grupo | Endpoints |
+|---|---|
+| Local | `ListarLocais`, `ObterLocal/{id}`, `CriarLocal`, `AtualizarLocal/{id}`, `DeletarLocal/{id}` |
+| Equipamento | `ListarEquipamentos`, `ObterEquipamento/{id}`, `CriarEquipamento`, `AtualizarEquipamento/{id}`, `DeletarEquipamento/{id}` |
+| Evento | `ListarEventosDoDia`, `ListarEventosDaSemana`, `ObterEvento/{id}`, `CriarEvento`, `AtualizarEvento/{id}`, `CancelarEvento/{id}` |
+| Reserva | `ReservarEquipamento`, `LiberarEquipamento` |
+
+Vídeos, notificações e login entram nas próximas etapas.
+
+<div align="center">
+
+<img src="Readme%20Assets/07-api-swagger.png" alt="Documentação da API no Swagger, com os endpoints de equipamento e evento" width="760">
+
+</div>
+
+### Agenda do dia
+
+`GET /Evento/ListarEventosDoDia?data=2026-11-20` devolve os eventos do dia, sem os cancelados, com os equipamentos de cada um. Os horários chegam em UTC (`Z`) e o app converte para o horário de Brasília.
+
+<div align="center">
+
+<img src="Readme%20Assets/08-api-agenda-dia.png" alt="Resposta da agenda do dia com os dois eventos e seus equipamentos" width="640">
+
+</div>
+
+### Conflito de equipamento bloqueado
+
+Tentar reservar a câmera num evento das 10:00 às 11:00, quando ela já está no evento das 09:00 às 12:00, é recusado pelo banco, e a API devolve uma mensagem clara:
+
+<div align="center">
+
+<img src="Readme%20Assets/09-api-conflito.png" alt="Resposta 400 da API ao reservar um equipamento já reservado no mesmo horário" width="640">
+
+</div>
+
+---
+
 ## 📁 Estrutura do repositório
 
 | Pasta | Conteúdo |
 |---|---|
+| [`api/`](api/) | API em .NET 9, em camadas |
 | [`database/`](database/) | Scripts SQL: esquema, dados de exemplo, testes das regras e consultas da agenda |
 | [`Readme Assets/`](Readme%20Assets/) | Imagens usadas neste README |
 | [`Relatórios de Entrega/`](Relatórios%20de%20Entrega/) | Relatórios do bootcamp e prints da conversa com a Tomodachi |
 
-As pastas `api/` e `pwa/` entram quando o desenvolvimento começar.
+A pasta `pwa/` entra quando o desenvolvimento do aplicativo começar.
 
 ---
 
-## 🚀 Como rodar o banco
+## 🚀 Como rodar
+
+### Banco
 
 Precisa do PostgreSQL 14 ou mais novo. Com o `psql`, a partir da raiz do repositório:
 
@@ -145,6 +202,20 @@ psql -U postgres -d tomodachi -v ON_ERROR_STOP=1 -f database/02-dados-exemplo.sq
 ```
 
 O arquivo `database/03-testes-regras.sql` testa as regras, e cada teste indica o resultado esperado. Três deles falham de propósito.
+
+### API
+
+Precisa do .NET 9 SDK. A conexão com o banco fica no arquivo `api/.env`, que não vai para o GitHub:
+
+1. Copie `api/.env.example` para `api/.env`.
+2. Troque `TROQUE_AQUI` pela senha do seu PostgreSQL.
+3. Rode, a partir da pasta `api`:
+
+```bash
+dotnet run --project src/Tomodachi.API
+```
+
+4. Abra `http://localhost:5080/swagger`.
 
 ---
 
@@ -166,7 +237,7 @@ Professor responsável: Victor Hugo Braguim Canto.
 | Levantar a demanda e fechar o escopo com a Tomodachi | 31/10/2026 | ✅ Feito |
 | Identidade visual | 14/11/2026 | ✅ Feito |
 | Modelagem do banco (DER e scripts SQL) | 14/11/2026 | ✅ Feito |
-| API em .NET 9, regras de negócio e PWA | 20/11/2026 | 🔜 A fazer |
+| API em .NET 9, regras de negócio e PWA | 20/11/2026 | 🚧 API com locais, equipamentos, eventos e reservas; faltam vídeos, login e PWA |
 | Notificações push, testes com a Tomodachi | 28/11/2026 | 🔜 A fazer |
 | Relatório final | 03/12/2026 | 🔜 A fazer |
 | Apresentação | 04 ou 05/12/2026 | 🔜 A confirmar |
