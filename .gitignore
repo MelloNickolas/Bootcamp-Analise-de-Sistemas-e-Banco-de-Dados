@@ -3,6 +3,12 @@
 .env.*
 !.env.example
 
+# Node (PWA)
+node_modules/
+dist/
+dev-dist/
+*.local
+
 # .NET
 bin/
 obj/

@@ -5,6 +5,8 @@ using Tomodachi.Repository.Context;
 using Tomodachi.Repository.Helpers;
 using Tomodachi.Repository.Interfaces;
 using Tomodachi.Repository.Repositories;
+using Tomodachi.Services.Interfaces;
+using Tomodachi.Services.Services;
 
 CarregarEnv();
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
@@ -23,6 +25,13 @@ builder.Services.AddScoped<IEquipamentoRepository, EquipamentoRepository>();
 builder.Services.AddScoped<IEquipamentoApplication, EquipamentoApplication>();
 builder.Services.AddScoped<IEventoRepository, EventoRepository>();
 builder.Services.AddScoped<IEventoApplication, EventoApplication>();
+builder.Services.AddScoped<IVideoRepository, VideoRepository>();
+builder.Services.AddScoped<IVideoApplication, VideoApplication>();
+builder.Services.AddScoped<INotificacaoRepository, NotificacaoRepository>();
+builder.Services.AddScoped<INotificacaoApplication, NotificacaoApplication>();
+builder.Services.AddScoped<IDispositivoRepository, DispositivoRepository>();
+builder.Services.AddScoped<IDispositivoApplication, DispositivoApplication>();
+builder.Services.AddScoped<IPushService, PushConsoleService>(); // trocar pelo Firebase quando a conta existir
 
 // CORS (origens do .env, separadas por vírgula)
 var origens = (builder.Configuration["CORS_ORIGINS"] ?? "http://localhost:5173")

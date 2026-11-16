@@ -1,3 +1,4 @@
+using Tomodachi.Application.Helpers;
 using Tomodachi.Application.Interfaces;
 using Tomodachi.Domain.Constantes;
 using Tomodachi.Domain.Entities;
@@ -9,11 +10,13 @@ public class EventoApplication : IEventoApplication
 {
   private readonly IEventoRepository _eventoRepository;
   private readonly IEquipamentoRepository _equipamentoRepository;
+  private readonly INotificacaoRepository _notificacaoRepository;
 
-  public EventoApplication(IEventoRepository eventoRepository, IEquipamentoRepository equipamentoRepository)
+  public EventoApplication(IEventoRepository eventoRepository, IEquipamentoRepository equipamentoRepository, INotificacaoRepository notificacaoRepository)
   {
     _eventoRepository = eventoRepository;
     _equipamentoRepository = equipamentoRepository;
+    _notificacaoRepository = notificacaoRepository;
   }
 
   public async Task<int> CriarEventoAsync(EventoGravacao evento)
@@ -21,7 +24,14 @@ public class EventoApplication : IEventoApplication
     if (evento == null) throw new Exception("Evento não pode ser vazio.");
     ValidarInformacoes(evento);
     evento.Status = StatusEvento.Agendado;
-    return await _eventoRepository.SalvarAsync(evento);
+    var id = await _eventoRepository.SalvarAsync(evento);
+
+    // Aviso da gravação: começa 48 horas antes e repete a cada 2 horas até ser concluída
+    await _notificacaoRepository.SalvarAsync(new Notificacao
+    {
+      EventoID = id, Tipo = TipoNotificacao.Gravacao, ProximoEnvio = AgendamentoHelper.PrimeiroEnvio(evento.Inicio), Repete = true
+    });
+    return id;
   }
 
   public async Task AtualizarEventoAsync(EventoGravacao evento)
@@ -40,22 +50,33 @@ public class EventoApplication : IEventoApplication
       Status = string.IsNullOrWhiteSpace(evento.Status) ? existente.Status : evento.Status
     };
     await _eventoRepository.AtualizarAsync(atualizado);
+
+    // Evento concluído ou cancelado: encerra os avisos. Senão, reagenda o aviso da gravação para o novo horário.
+    if (atualizado.Status == StatusEvento.Realizado || atualizado.Status == StatusEvento.Cancelado)
+    {
+      await EncerrarAvisosAsync(existente.ID);
+      return;
+    }
+    foreach (var notificacao in await _notificacaoRepository.ListarAbertasPorItemAsync(existente.ID, null))
+    {
+      if (notificacao.Tipo != TipoNotificacao.Gravacao) continue;
+      notificacao.ProximoEnvio = AgendamentoHelper.PrimeiroEnvio(atualizado.Inicio);
+      await _notificacaoRepository.AtualizarAsync(notificacao);
+    }
   }
 
   public async Task CancelarEventoAsync(int id)
   {
     var existente = await ValidarExistentePorId(id);
     if (existente.Status == StatusEvento.Cancelado) throw new Exception("O evento já está cancelado.");
+    await AlterarStatusAsync(existente, StatusEvento.Cancelado);
+  }
 
-    await _eventoRepository.AtualizarAsync(new EventoGravacao
-    {
-      ID = existente.ID,
-      Titulo = existente.Titulo,
-      LocalID = existente.LocalID,
-      Inicio = existente.Inicio,
-      Fim = existente.Fim,
-      Status = StatusEvento.Cancelado
-    });
+  public async Task ConcluirEventoAsync(int id)
+  {
+    var existente = await ValidarExistentePorId(id);
+    if (existente.Status != StatusEvento.Agendado) throw new Exception("Só é possível concluir um evento agendado.");
+    await AlterarStatusAsync(existente, StatusEvento.Realizado);
   }
 
   public async Task<EventoGravacao> ObterEventoPorIdAsync(int id) => await ValidarExistentePorId(id);
@@ -83,7 +104,18 @@ public class EventoApplication : IEventoApplication
     if (!equipamento.Ativo) throw new Exception("O equipamento está inativo.");
 
     // O banco garante que o mesmo equipamento não fique em dois eventos ao mesmo tempo.
-    return await _eventoRepository.SalvarReservaAsync(new ReservaEquipamento { EventoID = eventoID, EquipamentoID = equipamentoID });
+    var id = await _eventoRepository.SalvarReservaAsync(new ReservaEquipamento { EventoID = eventoID, EquipamentoID = equipamentoID });
+
+    // Aviso menor, enviado uma vez só (um por evento)
+    var abertas = await _notificacaoRepository.ListarAbertasPorItemAsync(eventoID, null);
+    if (!abertas.Any(notificacao => notificacao.Tipo == TipoNotificacao.AvisoEquipamento))
+    {
+      await _notificacaoRepository.SalvarAsync(new Notificacao
+      {
+        EventoID = eventoID, Tipo = TipoNotificacao.AvisoEquipamento, ProximoEnvio = DateTime.UtcNow, Repete = false
+      });
+    }
+    return id;
   }
 
   public async Task LiberarEquipamentoAsync(int eventoID, int equipamentoID)
@@ -94,6 +126,30 @@ public class EventoApplication : IEventoApplication
   }
 
   #region Úteis
+  // Troca só o status do evento e encerra os avisos abertos dele.
+  private async Task AlterarStatusAsync(EventoGravacao existente, string status)
+  {
+    await _eventoRepository.AtualizarAsync(new EventoGravacao
+    {
+      ID = existente.ID,
+      Titulo = existente.Titulo,
+      LocalID = existente.LocalID,
+      Inicio = existente.Inicio,
+      Fim = existente.Fim,
+      Status = status
+    });
+    await EncerrarAvisosAsync(existente.ID);
+  }
+
+  private async Task EncerrarAvisosAsync(int eventoID)
+  {
+    foreach (var notificacao in await _notificacaoRepository.ListarAbertasPorItemAsync(eventoID, null))
+    {
+      notificacao.ConfirmadaEm = DateTime.UtcNow;
+      await _notificacaoRepository.AtualizarAsync(notificacao);
+    }
+  }
+
   private static void ValidarInformacoes(EventoGravacao evento)
   {
     if (string.IsNullOrWhiteSpace(evento.Titulo))

@@ -78,6 +78,19 @@ public class EventoController : ControllerBase
     catch (Exception ex) { return BadRequest(new { mensagem = ex.Message }); }
   }
 
+  // Marca a gravação como realizada e encerra os avisos dela
+  [HttpPut]
+  [Route("ConcluirEvento/{id}")]
+  public async Task<ActionResult> ConcluirEvento(int id)
+  {
+    try
+    {
+      await _eventoApplication.ConcluirEventoAsync(id);
+      return Ok();
+    }
+    catch (Exception ex) { return BadRequest(new { mensagem = ex.Message }); }
+  }
+
   // ---------- RESERVA DE EQUIPAMENTO ----------
   [HttpPost]
   [Route("ReservarEquipamento")]

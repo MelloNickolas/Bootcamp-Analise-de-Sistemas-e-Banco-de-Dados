@@ -145,8 +145,18 @@ Fluxo entre as camadas: `API → Application → Repository → Domain`.
 | Equipamento | `ListarEquipamentos`, `ObterEquipamento/{id}`, `CriarEquipamento`, `AtualizarEquipamento/{id}`, `DeletarEquipamento/{id}` |
 | Evento | `ListarEventosDoDia`, `ListarEventosDaSemana`, `ObterEvento/{id}`, `CriarEvento`, `AtualizarEvento/{id}`, `CancelarEvento/{id}` |
 | Reserva | `ReservarEquipamento`, `LiberarEquipamento` |
+| Vídeo | `ListarVideos`, `ObterVideo/{id}`, `CriarVideo`, `AtualizarVideo/{id}`, `AlterarStatusVideo/{id}`, `DeletarVideo/{id}` |
+| Aparelho | `RegistrarDispositivo`, `ListarDispositivos`, `RemoverDispositivo/{id}` |
+| Notificação | `ListarAbertas`, `ConfirmarNotificacao/{id}`, `ProcessarPendentes` |
 
-Vídeos, notificações e login entram nas próximas etapas.
+O login compartilhado entra numa próxima etapa.
+
+### Notificações na API
+
+- Ao criar um evento ou um vídeo, a API agenda os avisos: o primeiro sai **48 horas antes** do prazo ou da gravação.
+- Gravações e prazos de entrega **repetem a cada 2 horas** até o item ser concluído. O prazo de edição e o aviso de equipamento reservado são enviados **uma vez só**.
+- Concluir ou cancelar um evento, ou entregar um vídeo, encerra os avisos. Mudar um horário ou prazo reagenda o aviso.
+- Um agendador externo chama `POST /Notificacao/ProcessarPendentes` a cada minuto, com a chave `X-Job-Key` definida no `.env` (`JOB_KEY`). Por enquanto o envio é simulado no log, até a integração com o Firebase.
 
 <div align="center">
 
@@ -237,7 +247,7 @@ Professor responsável: Victor Hugo Braguim Canto.
 | Levantar a demanda e fechar o escopo com a Tomodachi | 31/10/2026 | ✅ Feito |
 | Identidade visual | 14/11/2026 | ✅ Feito |
 | Modelagem do banco (DER e scripts SQL) | 14/11/2026 | ✅ Feito |
-| API em .NET 9, regras de negócio e PWA | 20/11/2026 | 🚧 API com locais, equipamentos, eventos e reservas; faltam vídeos, login e PWA |
+| API em .NET 9, regras de negócio e PWA | 20/11/2026 | 🚧 API com eventos, reservas, vídeos e notificações prontos; faltam login e PWA |
 | Notificações push, testes com a Tomodachi | 28/11/2026 | 🔜 A fazer |
 | Relatório final | 03/12/2026 | 🔜 A fazer |
 | Apresentação | 04 ou 05/12/2026 | 🔜 A confirmar |
