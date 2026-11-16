@@ -3,6 +3,11 @@
 .env.*
 !.env.example
 
+# Credenciais do Firebase (chave privada da conta de serviço): nunca no repositório
+*firebase-adminsdk*.json
+firebase-credentials*.json
+serviceAccount*.json
+
 # Node (PWA)
 node_modules/
 dist/

@@ -1,11 +1,34 @@
-import { Bell, Smartphone, Wifi, WifiOff } from 'lucide-react';
+import { useState } from 'react';
+import { Bell, BellRing, Smartphone, Wifi, WifiOff } from 'lucide-react';
 import { Cabecalho } from '../components/Cabecalho';
 import { useCarregar } from '../hooks/useCarregar';
+import { mensagemDeErro } from '../lib/api';
+import { firebaseConfigurado, guardarToken, nomeDoAparelho, obterTokenDePush, tokenSalvo } from '../lib/firebase';
+import DispositivoApi from '../services/dispositivoApi';
 import LocalApi from '../services/localApi';
 
 export default function Ajustes() {
   const saude = useCarregar(() => LocalApi.saude(), []);
   const conectado = saude.dados === true;
+
+  const [ativadas, setAtivadas] = useState(Boolean(tokenSalvo()));
+  const [ativando, setAtivando] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
+
+  async function ativar() {
+    setAtivando(true);
+    setErro(null);
+    try {
+      const token = await obterTokenDePush();
+      await DispositivoApi.registrar(token, nomeDoAparelho());
+      guardarToken(token);
+      setAtivadas(true);
+    } catch (e) {
+      setErro(e instanceof Error && !('response' in e) ? e.message : mensagemDeErro(e));
+    } finally {
+      setAtivando(false);
+    }
+  }
 
   return (
     <>
@@ -31,17 +54,33 @@ export default function Ajustes() {
 
       <section className="cartao entra mt-3 p-4" style={{ animationDelay: '60ms' }} aria-labelledby="avisos">
         <div className="flex items-start gap-3">
-          <Bell className="mt-0.5 text-accent-text" aria-hidden="true" />
+          {ativadas ? <BellRing className="mt-0.5 text-[#79b5ae]" aria-hidden="true" /> : <Bell className="mt-0.5 text-accent-text" aria-hidden="true" />}
           <div className="flex-1">
             <h2 id="avisos" className="font-bold">
               Notificações
             </h2>
             <p className="mt-1 text-sm text-muted">
-              Os avisos chegam 48 horas antes e repetem a cada 2 horas. A ativação no seu iPhone entra na próxima etapa.
+              Os avisos chegam 48 horas antes e repetem a cada 2 horas, até o item ser concluído.
             </p>
-            <button type="button" className="btn-suave mt-3" disabled>
-              Ativar notificações (em breve)
-            </button>
+
+            {ativadas ? (
+              <p className="mt-3 text-sm font-semibold text-[#79b5ae]" role="status">
+                Ativadas neste aparelho
+              </p>
+            ) : (
+              <button type="button" className="btn-suave mt-3" onClick={ativar} disabled={ativando || !firebaseConfigurado}>
+                {ativando ? 'Ativando...' : 'Ativar notificações'}
+              </button>
+            )}
+
+            {!firebaseConfigurado && !ativadas && (
+              <p className="mt-2 text-sm text-muted">O Firebase ainda não foi configurado neste app.</p>
+            )}
+            {erro && (
+              <p role="alert" className="mt-2 text-sm text-[#c2575f]">
+                {erro}
+              </p>
+            )}
           </div>
         </div>
       </section>
@@ -57,8 +96,9 @@ export default function Ajustes() {
               <li>Abra este endereço no Safari.</li>
               <li>Toque no botão de compartilhar.</li>
               <li>Escolha &quot;Adicionar à Tela de Início&quot;.</li>
+              <li>Abra o app pelo ícone e ative as notificações aqui.</li>
             </ol>
-            <p className="mt-2 text-sm text-muted">Instalado, o app abre em tela cheia e recebe as notificações.</p>
+            <p className="mt-2 text-sm text-muted">No iPhone, as notificações só funcionam com o app instalado e aberto por esse ícone.</p>
           </div>
         </div>
       </section>

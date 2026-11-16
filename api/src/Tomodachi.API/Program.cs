@@ -1,3 +1,6 @@
+using FirebaseAdmin;
+using FirebaseAdmin.Messaging;
+using Google.Apis.Auth.OAuth2;
 using Microsoft.EntityFrameworkCore;
 using Tomodachi.Application.Applications;
 using Tomodachi.Application.Interfaces;
@@ -31,7 +34,24 @@ builder.Services.AddScoped<INotificacaoRepository, NotificacaoRepository>();
 builder.Services.AddScoped<INotificacaoApplication, NotificacaoApplication>();
 builder.Services.AddScoped<IDispositivoRepository, DispositivoRepository>();
 builder.Services.AddScoped<IDispositivoApplication, DispositivoApplication>();
-builder.Services.AddScoped<IPushService, PushConsoleService>(); // trocar pelo Firebase quando a conta existir
+
+// PUSH: Firebase se houver credencial no .env; senão, só simula no log.
+// FIREBASE_CREDENTIALS_PATH = caminho do arquivo JSON (fora do repositório) ou FIREBASE_CREDENTIALS_JSON = conteúdo do JSON.
+var caminhoFirebase = builder.Configuration["FIREBASE_CREDENTIALS_PATH"];
+var jsonFirebase = builder.Configuration["FIREBASE_CREDENTIALS_JSON"];
+if (!string.IsNullOrWhiteSpace(caminhoFirebase) || !string.IsNullOrWhiteSpace(jsonFirebase))
+{
+  var credencial = !string.IsNullOrWhiteSpace(jsonFirebase)
+    ? CredentialFactory.FromJson<ServiceAccountCredential>(jsonFirebase).ToGoogleCredential()
+    : CredentialFactory.FromFile<ServiceAccountCredential>(caminhoFirebase!).ToGoogleCredential();
+  FirebaseApp.Create(new AppOptions { Credential = credencial });
+  builder.Services.AddSingleton(FirebaseMessaging.DefaultInstance);
+  builder.Services.AddScoped<IPushService, FcmPushService>();
+}
+else
+{
+  builder.Services.AddScoped<IPushService, PushConsoleService>();
+}
 
 // CORS (origens do .env, separadas por vírgula)
 var origens = (builder.Configuration["CORS_ORIGINS"] ?? "http://localhost:5173")
