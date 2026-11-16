@@ -64,7 +64,8 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+// Swagger só no desenvolvimento, ou em produção quando SWAGGER_ENABLED=true
+if (app.Environment.IsDevelopment() || builder.Configuration["SWAGGER_ENABLED"] == "true")
 {
   app.UseSwagger();
   app.UseSwaggerUI();
