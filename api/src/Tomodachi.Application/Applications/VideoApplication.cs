@@ -27,7 +27,7 @@ public class VideoApplication : IVideoApplication
 
     var id = await _videoRepository.SalvarAsync(video);
 
-    // Aviso do prazo de edição (uma vez) e do prazo de entrega (repete a cada 2 horas até a entrega)
+    // Aviso do prazo de edição (uma vez) e do prazo de entrega (repete a cada 3 horas até a entrega)
     await _notificacaoRepository.SalvarAsync(new Notificacao
     {
       VideoID = id, Tipo = TipoNotificacao.PrazoEdicao, ProximoEnvio = AgendamentoHelper.PrimeiroEnvio(video.PrazoEdicao), Repete = false

@@ -90,7 +90,7 @@ export default function NovaGravacao() {
           </div>
         </div>
 
-        <p className="text-sm text-muted">Os avisos desta gravação começam 48 horas antes e repetem a cada 2 horas até você concluir.</p>
+        <p className="text-sm text-muted">Os avisos desta gravação começam 48 horas antes e repetem a cada 3 horas até você concluir.</p>
 
         {erro && (
           <p role="alert" className="rounded-2xl border border-[#c2575f]/40 bg-[#c2575f]/10 px-4 py-3 text-sm">

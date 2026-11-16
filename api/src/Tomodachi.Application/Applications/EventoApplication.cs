@@ -26,7 +26,7 @@ public class EventoApplication : IEventoApplication
     evento.Status = StatusEvento.Agendado;
     var id = await _eventoRepository.SalvarAsync(evento);
 
-    // Aviso da gravação: começa 48 horas antes e repete a cada 2 horas até ser concluída
+    // Aviso da gravação: começa 48 horas antes e repete a cada 3 horas até ser concluída
     await _notificacaoRepository.SalvarAsync(new Notificacao
     {
       EventoID = id, Tipo = TipoNotificacao.Gravacao, ProximoEnvio = AgendamentoHelper.PrimeiroEnvio(evento.Inicio), Repete = true

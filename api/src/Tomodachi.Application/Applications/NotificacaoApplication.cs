@@ -60,7 +60,7 @@ public class NotificacaoApplication : INotificacaoApplication
       enviadas++;
 
       if (notificacao.Repete)
-        notificacao.ProximoEnvio = agora.AddHours(AgendamentoHelper.HorasRepeticao);
+        notificacao.ProximoEnvio = ProximaRepeticao(notificacao.ProximoEnvio, agora);
       else
         notificacao.ConfirmadaEm = agora;
       await _notificacaoRepository.AtualizarAsync(notificacao);
@@ -69,6 +69,18 @@ public class NotificacaoApplication : INotificacaoApplication
   }
 
   #region Úteis
+  // Próximo envio a partir do horário combinado (não de quando o envio saiu), para os horários não se desalinharem.
+  // Se o servidor ficou parado e perdeu rodadas, pula para a primeira que ainda está no futuro.
+  private static DateTime ProximaRepeticao(DateTime envioAnterior, DateTime agoraUtc)
+  {
+    var proximo = envioAnterior.ToUniversalTime();
+    do
+    {
+      proximo = proximo.AddHours(AgendamentoHelper.HorasRepeticao);
+    } while (proximo <= agoraUtc);
+    return proximo;
+  }
+
   private static bool ItemConcluido(Notificacao notificacao)
   {
     if (notificacao.Evento != null)

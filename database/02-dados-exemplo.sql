@@ -26,7 +26,7 @@ INSERT INTO video (titulo, evento_id, status, prazo_edicao, prazo_entrega) VALUE
     ('Vídeo institucional', 1, 'a_editar',  '2026-11-25 18:00-03', '2026-11-27 18:00-03'),
     ('Vídeo promocional',   3, 'em_edicao', '2026-11-28 18:00-03', '2026-11-30 18:00-03');
 
--- Avisos começam 48 horas antes e repetem a cada 2 horas até a confirmação
+-- Avisos começam 48 horas antes e repetem a cada 3 horas até a confirmação
 INSERT INTO notificacao (evento_id, tipo, proximo_envio, repete) VALUES
     (1, 'gravacao', '2026-11-18 09:00-03', true);
 INSERT INTO notificacao (video_id, tipo, proximo_envio, repete) VALUES

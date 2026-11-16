@@ -4,12 +4,14 @@
 
 **Gravações, vídeos a editar e equipamentos em um só lugar, com avisos no iPhone até o item ser concluído.**
 
-![Status](https://img.shields.io/badge/status-em%20andamento-yellow)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-banco-4169E1?logo=postgresql&logoColor=white)
+![Status](https://img.shields.io/badge/status-no%20ar-success)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-4169E1?logo=postgresql&logoColor=white)
 ![.NET](https://img.shields.io/badge/.NET%209-API-512BD4?logo=dotnet&logoColor=white)
-![PWA](https://img.shields.io/badge/PWA-celular-5A0FC8?logo=pwa&logoColor=white)
+![React](https://img.shields.io/badge/React-PWA-61DAFB?logo=react&logoColor=black)
 ![Firebase](https://img.shields.io/badge/Firebase-notifica%C3%A7%C3%B5es-FFCA28?logo=firebase&logoColor=black)
 ![UNISAGRADO](https://img.shields.io/badge/UNISAGRADO-Bootcamp%20An%C3%A1lise%20de%20Sistemas%20e%20BD-0A5C36)
+
+**App:** [tomodachi-web.vercel.app](https://tomodachi-web.vercel.app)
 
 </div>
 
@@ -17,11 +19,11 @@
 
 ## 📌 Sobre o projeto
 
-Projeto extensionista do **Bootcamp Análise de Sistemas e Banco de Dados** (UNISAGRADO, 2026/2). A regra do módulo é resolver uma necessidade **real** de uma organização real, então o trabalho é feito com a **Tomodachi**, produtora de filmagem de três pessoas. O fundador, Felipe Davi, pediu um calendário de gravações e edições, em aplicativo de celular, com notificações.
+Projeto extensionista do **Bootcamp Análise de Sistemas e Banco de Dados** (UNISAGRADO, 2026/2). A regra do módulo é resolver uma necessidade **real** de uma organização real, então o trabalho é feito com a **Tomodachi**, produtora de filmagem de três pessoas, fundada por **Felipe Davi**. Ele pediu um calendário de gravações e edições, em aplicativo de celular, com notificações.
 
 ### O pedido
 
-Na reunião de 31/10/2026, ficou combinado um calendário para a equipe registrar agendamentos e necessidades, com lembretes para evitar o esquecimento de equipamentos ou de qualquer outro item do dia. Por causa do prazo, a primeira versão cobre só o calendário (MVP), e o app é de celular.
+Na reunião de 31/10/2026 com o Felipe, ficou combinado um calendário para a equipe registrar agendamentos e necessidades, com lembretes para evitar o esquecimento de equipamentos ou de qualquer outro item do dia. Por causa do prazo, a primeira versão cobre só o calendário (MVP), e o app é de celular.
 
 ### A solução
 
@@ -30,14 +32,14 @@ Um sistema que:
 - 🎬 registra os **eventos de gravação**, com data, horário, local e os equipamentos usados;
 - ✂️ registra os **vídeos a editar**, com prazo de edição, prazo de entrega e situação (a editar, em edição, entregue);
 - 🚫 **bloqueia a reserva do mesmo equipamento em dois eventos ao mesmo tempo**;
-- 📱 mostra a **agenda do dia e da semana** no celular;
+- 📱 mostra a **agenda do dia e da semana** no celular, em um app instalável (PWA);
 - 🔔 envia **notificações push no iPhone** sobre gravações próximas e prazos de vídeo.
 
 ### Como funcionam as notificações
 
 - Começam **48 horas antes** do prazo ou da gravação.
-- Repetem a **cada 2 horas** até o item ser marcado como concluído ou confirmado no app.
-- Gravações e prazos de entrega repetem. Avisos menores, como um equipamento reservado, são enviados uma vez só.
+- Repetem a **cada 3 horas** até o item ser marcado como concluído ou confirmado no app.
+- Gravações e prazos de entrega repetem. O prazo de edição e o aviso de equipamento reservado são enviados uma vez só.
 - Todos os aparelhos cadastrados recebem os avisos.
 
 ### Fora desta versão
@@ -52,17 +54,20 @@ Um sistema que:
 
 ```mermaid
 flowchart LR
-    A["📱 PWA no celular"] --> B["⚙️ API .NET 9<br/>regras de negócio"]
-    B --> C[("🗄️ PostgreSQL")]
-    B --> D["🔔 Firebase Cloud Messaging"]
+    A["📱 App (PWA)<br/>Vercel"] -->|HTTPS| B["⚙️ API .NET 9<br/>Render"]
+    B --> C[("🗄️ PostgreSQL<br/>Neon")]
+    B -->|envia| D["🔔 Firebase Cloud Messaging"]
     D --> E["📲 Notificação no iPhone"]
+    F["⏱️ cron-job.org<br/>a cada minuto"] -->|ProcessarPendentes| B
 ```
+
+O servidor gratuito dorme quando ninguém usa, então quem dispara os avisos é um agendador externo, que pergunta à API a cada minuto se existe algum aviso vencido.
 
 ---
 
 ## 🎨 Identidade visual
 
-Tema escuro com destaque dourado (Champagne `#D6BD87`), fontes **Manrope** nos títulos e **Inter** nos textos, e uma cor para cada status.
+Criada pela Rafaela: tema escuro com destaque dourado (Champagne `#D6BD87`), fontes **Manrope** nos títulos e **Inter** nos textos, e uma cor para cada status. O app também tem uma versão clara, que acompanha a configuração do celular.
 
 <div align="center">
 
@@ -124,14 +129,14 @@ Dados de exemplo, com a câmera reservada em horários diferentes:
 
 ## 🔌 API
 
-API REST em **.NET 9**, em camadas, com **EF Core** mapeado nas tabelas criadas pelos scripts SQL (sem migrations). A documentação interativa fica em `/swagger`.
+API REST em **.NET 9**, em camadas, com **EF Core** mapeado nas tabelas criadas pelos scripts SQL (sem migrations). Em desenvolvimento, a documentação interativa fica em `/swagger`.
 
 ```
 api/src/
   Tomodachi.Domain       entidades e constantes de status
   Tomodachi.Repository   DbContext, configurações do EF Core, repositórios e DTOs
   Tomodachi.Application  regras de negócio
-  Tomodachi.Services     serviços auxiliares (login e notificações, em breve)
+  Tomodachi.Services     envio das notificações pelo Firebase
   Tomodachi.API          controllers e Program.cs
 ```
 
@@ -143,20 +148,11 @@ Fluxo entre as camadas: `API → Application → Repository → Domain`.
 |---|---|
 | Local | `ListarLocais`, `ObterLocal/{id}`, `CriarLocal`, `AtualizarLocal/{id}`, `DeletarLocal/{id}` |
 | Equipamento | `ListarEquipamentos`, `ObterEquipamento/{id}`, `CriarEquipamento`, `AtualizarEquipamento/{id}`, `DeletarEquipamento/{id}` |
-| Evento | `ListarEventosDoDia`, `ListarEventosDaSemana`, `ObterEvento/{id}`, `CriarEvento`, `AtualizarEvento/{id}`, `CancelarEvento/{id}` |
+| Evento | `ListarEventosDoDia`, `ListarEventosDaSemana`, `ObterEvento/{id}`, `CriarEvento`, `AtualizarEvento/{id}`, `CancelarEvento/{id}`, `ConcluirEvento/{id}` |
 | Reserva | `ReservarEquipamento`, `LiberarEquipamento` |
 | Vídeo | `ListarVideos`, `ObterVideo/{id}`, `CriarVideo`, `AtualizarVideo/{id}`, `AlterarStatusVideo/{id}`, `DeletarVideo/{id}` |
 | Aparelho | `RegistrarDispositivo`, `ListarDispositivos`, `RemoverDispositivo/{id}` |
 | Notificação | `ListarAbertas`, `ConfirmarNotificacao/{id}`, `ProcessarPendentes` |
-
-O login compartilhado entra numa próxima etapa.
-
-### Notificações na API
-
-- Ao criar um evento ou um vídeo, a API agenda os avisos: o primeiro sai **48 horas antes** do prazo ou da gravação.
-- Gravações e prazos de entrega **repetem a cada 2 horas** até o item ser concluído. O prazo de edição e o aviso de equipamento reservado são enviados **uma vez só**.
-- Concluir ou cancelar um evento, ou entregar um vídeo, encerra os avisos. Mudar um horário ou prazo reagenda o aviso.
-- Um agendador externo chama `POST /Notificacao/ProcessarPendentes` a cada minuto, com a chave `X-Job-Key` definida no `.env` (`JOB_KEY`). Por enquanto o envio é simulado no log, até a integração com o Firebase.
 
 <div align="center">
 
@@ -184,6 +180,72 @@ Tentar reservar a câmera num evento das 10:00 às 11:00, quando ela já está n
 
 </div>
 
+### Notificações na API
+
+- Ao criar um evento ou um vídeo, a API agenda os avisos: o primeiro sai **48 horas antes** do prazo ou da gravação.
+- Gravações e prazos de entrega **repetem a cada 3 horas** até o item ser concluído. O prazo de edição e o aviso de equipamento reservado são enviados **uma vez só**.
+- Os horários seguem o combinado (por exemplo 09:00, 12:00, 15:00), sem acumular atraso. Se o servidor ficar parado, a API pula para a próxima rodada que ainda está no futuro.
+- Concluir ou cancelar um evento, ou entregar um vídeo, encerra os avisos. Mudar um horário ou prazo reagenda o aviso.
+- Um agendador externo chama `POST /Notificacao/ProcessarPendentes` a cada minuto, com a chave `X-Job-Key` definida no servidor (`JOB_KEY`). O envio é feito pelo Firebase Cloud Messaging.
+
+<div align="center">
+
+<img src="Readme%20Assets/11-api-notificacoes-abertas.png" alt="Lista de avisos abertos, com o tipo, o item e o próximo envio de cada um" width="640">
+
+</div>
+
+---
+
+## 📱 App (PWA)
+
+App em **React, TypeScript, Vite e Tailwind**, instalável na tela inicial do iPhone. Fica na pasta [`pwa/`](pwa/).
+
+| Tela | O que faz |
+|---|---|
+| Início | Resumo da semana e próximas gravações |
+| Calendário | Agenda do dia e da semana, com navegação entre as datas |
+| Vídeos | Lista por situação, com botões para iniciar a edição e marcar como entregue |
+| Nova gravação | Cadastro de uma gravação, com local, início e fim |
+| Ajustes | Estado da conexão, ativação das notificações e como instalar no iPhone |
+
+<div align="center">
+
+<img src="Readme%20Assets/12-app.png" alt="Tela inicial do app no celular, com o resumo da semana e o botão Nova gravação" width="320">
+
+</div>
+
+### Notificação no iPhone
+
+Testado em 15/11/2026: com o app instalado na tela inicial e fechado, o aviso chega na tela de bloqueio.
+
+<div align="center">
+
+<img src="Readme%20Assets/12-notificacao-celular.jpeg" alt="Tela de bloqueio do iPhone com as notificações Prazo de entrega e Prazo de edição do Tomodachi" width="300">
+
+</div>
+
+### Instalar no iPhone
+
+1. Abra [tomodachi-web.vercel.app](https://tomodachi-web.vercel.app) no **Safari**.
+2. Toque em compartilhar e escolha **Adicionar à Tela de Início**.
+3. Abra o app pelo ícone e, em **Ajustes**, toque em **Ativar notificações**.
+
+No iPhone as notificações só funcionam com o app instalado e aberto pelo ícone (iOS 16.4 ou mais novo).
+
+---
+
+## ☁️ Publicação
+
+| Peça | Serviço | Observação |
+|---|---|---|
+| Banco | **Neon** (PostgreSQL) | Criado com os scripts de `database/` |
+| API | **Render** (Docker, plano gratuito) | Pasta `api`, variáveis no painel do serviço |
+| App | **Vercel** | Pasta `pwa`, variáveis no painel do projeto |
+| Avisos | **cron-job.org** | Chama `ProcessarPendentes` a cada minuto |
+| Push | **Firebase Cloud Messaging** | Credencial guardada fora do repositório |
+
+Nenhum segredo fica no repositório. Os valores ficam em arquivos `.env` (ignorados pelo Git) e nos painéis dos serviços. As variáveis da API são `CONNECTION_STRING`, `CORS_ORIGINS`, `JOB_KEY`, `FIREBASE_CREDENTIALS_JSON` e `SWAGGER_ENABLED`. As do app começam com `VITE_`. Os modelos estão em `api/.env.example` e `pwa/.env.example`.
+
 ---
 
 ## 📁 Estrutura do repositório
@@ -191,11 +253,10 @@ Tentar reservar a câmera num evento das 10:00 às 11:00, quando ela já está n
 | Pasta | Conteúdo |
 |---|---|
 | [`api/`](api/) | API em .NET 9, em camadas |
+| [`pwa/`](pwa/) | App instalável para o celular |
 | [`database/`](database/) | Scripts SQL: esquema, dados de exemplo, testes das regras e consultas da agenda |
 | [`Readme Assets/`](Readme%20Assets/) | Imagens usadas neste README |
 | [`Relatórios de Entrega/`](Relatórios%20de%20Entrega/) | Relatórios do bootcamp e prints da conversa com a Tomodachi |
-
-A pasta `pwa/` entra quando o desenvolvimento do aplicativo começar.
 
 ---
 
@@ -215,10 +276,10 @@ O arquivo `database/03-testes-regras.sql` testa as regras, e cada teste indica o
 
 ### API
 
-Precisa do .NET 9 SDK. A conexão com o banco fica no arquivo `api/.env`, que não vai para o GitHub:
+Precisa do .NET 9 SDK. A configuração fica no arquivo `api/.env`, que não vai para o GitHub:
 
 1. Copie `api/.env.example` para `api/.env`.
-2. Troque `TROQUE_AQUI` pela senha do seu PostgreSQL.
+2. Troque os valores marcados com `TROQUE_AQUI` (senha do banco e a chave `JOB_KEY`). Para enviar notificações de verdade, aponte `FIREBASE_CREDENTIALS_PATH` para o arquivo de credencial do Firebase, guardado fora do repositório. Sem ele, o envio é só simulado no log.
 3. Rode, a partir da pasta `api`:
 
 ```bash
@@ -227,16 +288,33 @@ dotnet run --project src/Tomodachi.API
 
 4. Abra `http://localhost:5080/swagger`.
 
+### App
+
+Precisa do Node.js. A partir da pasta `pwa`:
+
+1. Copie `.env.example` para `.env` e preencha com os dados do projeto no Firebase.
+2. Rode:
+
+```bash
+npm install
+npm run build
+npm run preview
+```
+
+3. Abra `http://localhost:4173`. O service worker, que recebe as notificações, só funciona no app compilado. Com `npm run dev` dá para ajustar o visual, mas sem notificações.
+
 ---
 
-## 👥 Equipe
+## 👥 Equipe e cliente
 
 | Integrante | Papel |
 |---|---|
-| Nickolas Passos Homem de Mello | Coordenação, banco de dados, API e regras de negócio |
+| Nickolas Passos Homem de Mello | Coordenação, banco de dados, API, app e regras de negócio |
 | Rafaela Vilela China | Identidade visual |
 
-Professor responsável: Victor Hugo Braguim Canto.
+**Cliente:** Tomodachi, com o fundador Felipe Davi.
+
+**Professor responsável:** Victor Hugo Braguim Canto.
 
 ---
 
@@ -247,8 +325,11 @@ Professor responsável: Victor Hugo Braguim Canto.
 | Levantar a demanda e fechar o escopo com a Tomodachi | 31/10/2026 | ✅ Feito |
 | Identidade visual | 14/11/2026 | ✅ Feito |
 | Modelagem do banco (DER e scripts SQL) | 14/11/2026 | ✅ Feito |
-| API em .NET 9, regras de negócio e PWA | 20/11/2026 | 🚧 API com eventos, reservas, vídeos e notificações prontos; faltam login e PWA |
-| Notificações push, testes com a Tomodachi | 28/11/2026 | 🔜 A fazer |
+| API em .NET 9 e regras de negócio | 20/11/2026 | ✅ Feito |
+| App (PWA) | 20/11/2026 | ✅ Agenda, vídeos e nova gravação no ar |
+| Notificações push no iPhone | 28/11/2026 | ✅ Testadas em 15/11/2026 |
+| Login compartilhado e telas de cadastro (vídeo, equipamento, local e reserva) | 28/11/2026 | 🔜 A fazer |
+| Testes com a Tomodachi | 28/11/2026 | 🔜 A fazer |
 | Relatório final | 03/12/2026 | 🔜 A fazer |
 | Apresentação | 04 ou 05/12/2026 | 🔜 A confirmar |
 

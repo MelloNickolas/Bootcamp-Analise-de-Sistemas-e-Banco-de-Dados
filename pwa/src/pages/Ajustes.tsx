@@ -60,7 +60,7 @@ export default function Ajustes() {
               Notificações
             </h2>
             <p className="mt-1 text-sm text-muted">
-              Os avisos chegam 48 horas antes e repetem a cada 2 horas, até o item ser concluído.
+              Os avisos chegam 48 horas antes e repetem a cada 3 horas, até o item ser concluído.
             </p>
 
             {ativadas ? (

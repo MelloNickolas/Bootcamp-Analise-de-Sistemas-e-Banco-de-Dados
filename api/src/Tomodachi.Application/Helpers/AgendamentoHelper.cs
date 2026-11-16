@@ -3,7 +3,7 @@ namespace Tomodachi.Application.Helpers;
 public static class AgendamentoHelper
 {
   public const int HorasAntecedencia = 48;
-  public const int HorasRepeticao = 2;
+  public const int HorasRepeticao = 3;
 
   // Primeiro envio: 48 horas antes do alvo. Se já passou desse ponto, envia logo.
   public static DateTime PrimeiroEnvio(DateTime alvo)

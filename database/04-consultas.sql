@@ -79,12 +79,12 @@ SELECT n.id,
    AND n.proximo_envio <= timestamptz '2026-11-18 10:00-03'
  ORDER BY n.proximo_envio;
 
--- 8) Depois de enviar: repetir daqui a 2 horas (se repete) e confirmar quando o item for concluído.
+-- 8) Depois de enviar: repetir daqui a 3 horas (se repete) e confirmar quando o item for concluído.
 --    Roda dentro de uma transação desfeita, para não alterar os dados de exemplo.
 BEGIN;
 
 UPDATE notificacao
-   SET proximo_envio = proximo_envio + interval '2 hours'
+   SET proximo_envio = proximo_envio + interval '3 hours'
  WHERE id = 1 AND repete AND confirmada_em IS NULL;
 
 UPDATE notificacao
