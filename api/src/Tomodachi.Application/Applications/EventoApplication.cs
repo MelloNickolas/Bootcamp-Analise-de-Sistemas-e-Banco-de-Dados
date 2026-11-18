@@ -81,6 +81,12 @@ public class EventoApplication : IEventoApplication
 
   public async Task<EventoGravacao> ObterEventoPorIdAsync(int id) => await ValidarExistentePorId(id);
 
+  public async Task<IEnumerable<EventoGravacao>> ListarEventosAsync()
+  {
+    var agora = DateTime.UtcNow;
+    return await _eventoRepository.ListarPorPeriodoAsync(agora.AddDays(-30), agora.AddDays(365));
+  }
+
   public async Task<IEnumerable<EventoGravacao>> ListarEventosDoDiaAsync(DateOnly data)
   {
     var (inicio, fim) = LimitesEmUtc(data, 1);

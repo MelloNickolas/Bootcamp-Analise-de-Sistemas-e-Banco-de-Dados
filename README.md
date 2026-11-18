@@ -148,7 +148,7 @@ Fluxo entre as camadas: `API → Application → Repository → Domain`.
 |---|---|
 | Local | `ListarLocais`, `ObterLocal/{id}`, `CriarLocal`, `AtualizarLocal/{id}`, `DeletarLocal/{id}` |
 | Equipamento | `ListarEquipamentos`, `ObterEquipamento/{id}`, `CriarEquipamento`, `AtualizarEquipamento/{id}`, `DeletarEquipamento/{id}` |
-| Evento | `ListarEventosDoDia`, `ListarEventosDaSemana`, `ObterEvento/{id}`, `CriarEvento`, `AtualizarEvento/{id}`, `CancelarEvento/{id}`, `ConcluirEvento/{id}` |
+| Evento | `ListarEventos`, `ListarEventosDoDia`, `ListarEventosDaSemana`, `ObterEvento/{id}`, `CriarEvento`, `AtualizarEvento/{id}`, `CancelarEvento/{id}`, `ConcluirEvento/{id}` |
 | Reserva | `ReservarEquipamento`, `LiberarEquipamento` |
 | Vídeo | `ListarVideos`, `ObterVideo/{id}`, `CriarVideo`, `AtualizarVideo/{id}`, `AlterarStatusVideo/{id}`, `DeletarVideo/{id}` |
 | Aparelho | `RegistrarDispositivo`, `ListarDispositivos`, `RemoverDispositivo/{id}` |
@@ -213,8 +213,11 @@ App em **React, TypeScript, Vite e Tailwind**, instalável na tela inicial do iP
 | Entrar | Senha da equipe, pedida na primeira vez e depois de sair ou do token vencer |
 | Início | Resumo da semana e próximas gravações |
 | Calendário | Agenda do dia e da semana, com navegação entre as datas |
+| Gravação | Detalhes de uma gravação, com reserva e liberação de equipamentos, concluir e cancelar |
+| Nova gravação | Cadastro de uma gravação, com local, início e fim. Em seguida abre a gravação para reservar equipamentos |
 | Vídeos | Lista por situação, com botões para iniciar a edição e marcar como entregue |
-| Nova gravação | Cadastro de uma gravação, com local, início e fim |
+| Novo vídeo | Cadastro de um vídeo, com a gravação de origem (opcional) e os prazos de edição e entrega |
+| Cadastros | Equipamentos e locais: criar, editar e excluir (equipamentos podem ser desativados) |
 | Ajustes | Estado da conexão, ativação das notificações, instalação no iPhone e sair da conta |
 
 <div align="center">
@@ -338,7 +341,8 @@ npm run preview
 | App (PWA) | 20/11/2026 | ✅ Agenda, vídeos e nova gravação no ar |
 | Notificações push no iPhone | 28/11/2026 | ✅ Testadas em 15/11/2026 |
 | Login compartilhado | 28/11/2026 | ✅ Feito |
-| Telas de cadastro (vídeo, equipamento, local e reserva) | 28/11/2026 | 🔜 A fazer |
+| Telas de cadastro (vídeo, equipamento, local e reserva) | 28/11/2026 | ✅ Feito |
+| Limpar os dados de exemplo e cadastrar os dados reais da Tomodachi | 28/11/2026 | 🔜 A fazer |
 | Testes com a Tomodachi | 28/11/2026 | 🔜 A fazer |
 | Relatório final | 03/12/2026 | 🔜 A fazer |
 | Apresentação | 04 ou 05/12/2026 | 🔜 A confirmar |

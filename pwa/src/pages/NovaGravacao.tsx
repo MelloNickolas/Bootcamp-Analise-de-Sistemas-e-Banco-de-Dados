@@ -29,13 +29,14 @@ export default function NovaGravacao() {
 
     setSalvando(true);
     try {
-      await EventoApi.criar({
+      const novoID = await EventoApi.criar({
         titulo: titulo.trim(),
         localID: Number(localID),
         inicio: paraIsoBrasilia(inicio),
         fim: paraIsoBrasilia(fim)
       });
-      navegar('/calendario');
+      // Segue direto para a gravação, onde dá para reservar os equipamentos
+      navegar(`/gravacao/${novoID}`, { replace: true });
     } catch (e) {
       setErro(mensagemDeErro(e));
     } finally {
@@ -73,6 +74,11 @@ export default function NovaGravacao() {
             ))}
           </select>
           {locais.erro && <p className="mt-1.5 text-sm text-[#c2575f]">{locais.erro}</p>}
+          {!locais.carregando && !locais.erro && locais.dados?.length === 0 && (
+            <p className="mt-1.5 text-sm text-muted">
+              Nenhum local cadastrado. Cadastre em <Link to="/cadastros" className="font-semibold text-accent-text">Cadastros</Link>.
+            </p>
+          )}
         </div>
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">

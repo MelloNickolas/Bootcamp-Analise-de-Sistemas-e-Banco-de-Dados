@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Film } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Film, Plus } from 'lucide-react';
 import { Cabecalho } from '../components/Cabecalho';
 import { EstadoErro, EstadoVazio, Esqueleto } from '../components/Estados';
 import { VideoCard } from '../components/VideoCard';
@@ -21,7 +22,12 @@ export default function Videos() {
   return (
     <>
       <Cabecalho />
-      <h1 className="entra mt-3 text-[2rem] font-extrabold">Vídeos</h1>
+      <div className="entra mt-3 flex items-center justify-between gap-3">
+        <h1 className="text-[2rem] font-extrabold">Vídeos</h1>
+        <Link to="/novo-video" className="btn-ouro !min-h-11 !px-4 !text-base">
+          <Plus size={18} aria-hidden="true" /> Novo vídeo
+        </Link>
+      </div>
       <p className="mt-1 text-muted">Acompanhe o que está para editar e para entregar.</p>
 
       <div role="group" aria-label="Filtrar por situação" className="sem-barra -mx-5 mt-4 flex gap-2 overflow-x-auto px-5 pb-1">

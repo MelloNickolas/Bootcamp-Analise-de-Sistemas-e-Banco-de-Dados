@@ -1,10 +1,11 @@
 import { NavLink } from 'react-router-dom';
-import { CalendarDays, Clapperboard, Home, Settings } from 'lucide-react';
+import { CalendarDays, Clapperboard, Home, ListPlus, Settings } from 'lucide-react';
 
 const ITENS = [
   { para: '/', rotulo: 'Início', Icone: Home },
   { para: '/calendario', rotulo: 'Calendário', Icone: CalendarDays },
   { para: '/videos', rotulo: 'Vídeos', Icone: Clapperboard },
+  { para: '/cadastros', rotulo: 'Cadastros', Icone: ListPlus },
   { para: '/ajustes', rotulo: 'Ajustes', Icone: Settings }
 ];
 

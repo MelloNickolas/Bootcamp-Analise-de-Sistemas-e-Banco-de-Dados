@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using Tomodachi.Domain.Entities;
 using Tomodachi.Repository.Context;
 using Tomodachi.Repository.Interfaces;
@@ -11,15 +12,29 @@ public class LocalRepository : BaseRepository, ILocalRepository
 
   public async Task<int> SalvarAsync(Local local)
   {
-    _context.Locais.Add(local);
-    await _context.SaveChangesAsync();
-    return local.ID;
+    try
+    {
+      _context.Locais.Add(local);
+      await _context.SaveChangesAsync();
+      return local.ID;
+    }
+    catch (DbUpdateException ex)
+    {
+      throw TraduzirErro(ex);
+    }
   }
 
   public async Task AtualizarAsync(Local local)
   {
-    _context.Locais.Update(local);
-    await _context.SaveChangesAsync();
+    try
+    {
+      _context.Locais.Update(local);
+      await _context.SaveChangesAsync();
+    }
+    catch (DbUpdateException ex)
+    {
+      throw TraduzirErro(ex);
+    }
   }
 
   public async Task<Local?> ObterPorIdAsync(int id)
@@ -30,7 +45,28 @@ public class LocalRepository : BaseRepository, ILocalRepository
 
   public async Task DeletarAsync(Local local)
   {
-    _context.Locais.Remove(local);
-    await _context.SaveChangesAsync();
+    try
+    {
+      _context.Locais.Remove(local);
+      await _context.SaveChangesAsync();
+    }
+    catch (DbUpdateException ex)
+    {
+      throw TraduzirErro(ex);
+    }
   }
+
+  #region Úteis
+  private static Exception TraduzirErro(DbUpdateException ex)
+  {
+    if (ex.InnerException is PostgresException erro)
+    {
+      if (erro.SqlState == PostgresErrorCodes.UniqueViolation)
+        return new Exception("Já existe um local com esse nome.");
+      if (erro.SqlState == PostgresErrorCodes.ForeignKeyViolation)
+        return new Exception("Este local já foi usado em gravações e não pode ser excluído.");
+    }
+    return ex;
+  }
+  #endregion
 }

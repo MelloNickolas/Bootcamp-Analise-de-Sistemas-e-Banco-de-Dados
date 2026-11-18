@@ -15,6 +15,12 @@ public class ReservaRequest
   public int EquipamentoID { get; set; }
 }
 
+public class ReservaResponse
+{
+  public int EquipamentoID { get; set; }
+  public string Nome { get; set; } = string.Empty;
+}
+
 public class EventoResponse
 {
   public int ID { get; set; }
@@ -25,4 +31,5 @@ public class EventoResponse
   public DateTime Fim { get; set; }
   public string Status { get; set; } = string.Empty;
   public List<string> Equipamentos { get; set; } = new();
+  public List<ReservaResponse> Reservas { get; set; } = new();
 }

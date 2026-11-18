@@ -31,6 +31,15 @@ public class EventoController : ControllerBase
     catch (Exception ex) { return BadRequest(new { mensagem = ex.Message }); }
   }
 
+  // Gravações dos últimos 30 dias até daqui a um ano (para escolher a gravação de origem de um vídeo)
+  [HttpGet]
+  [Route("ListarEventos")]
+  public async Task<ActionResult> ListarEventos()
+  {
+    try { return Ok((await _eventoApplication.ListarEventosAsync()).Select(MapearResponse)); }
+    catch (Exception ex) { return BadRequest(new { mensagem = ex.Message }); }
+  }
+
   [HttpGet]
   [Route("ObterEvento/{id}")]
   public async Task<ActionResult> ObterEvento(int id)
@@ -128,6 +137,11 @@ public class EventoController : ControllerBase
       .Where(reserva => reserva.Ativa && reserva.Equipamento != null)
       .Select(reserva => reserva.Equipamento!.Nome)
       .OrderBy(nome => nome)
+      .ToList(),
+    Reservas = evento.Reservas
+      .Where(reserva => reserva.Ativa && reserva.Equipamento != null)
+      .Select(reserva => new ReservaResponse { EquipamentoID = reserva.EquipamentoID, Nome = reserva.Equipamento!.Nome })
+      .OrderBy(reserva => reserva.Nome)
       .ToList()
   };
 
