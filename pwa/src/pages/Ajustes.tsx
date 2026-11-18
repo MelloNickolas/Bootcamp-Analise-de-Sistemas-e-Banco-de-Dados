@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Bell, BellRing, LogOut, Smartphone, Wifi, WifiOff } from 'lucide-react';
 import { limparSessao } from '../lib/auth';
 import { Cabecalho } from '../components/Cabecalho';
+import { CartaoSilencio } from '../components/CartaoSilencio';
 import { useCarregar } from '../hooks/useCarregar';
 import { mensagemDeErro } from '../lib/api';
 import { firebaseConfigurado, guardarToken, nomeDoAparelho, obterTokenDePush, tokenSalvo } from '../lib/firebase';
@@ -92,6 +93,8 @@ export default function Ajustes() {
           </div>
         </div>
       </section>
+
+      <CartaoSilencio />
 
       <section className="cartao entra mt-3 p-4" style={{ animationDelay: '90ms' }} aria-labelledby="conta">
         <div className="flex items-center gap-3">

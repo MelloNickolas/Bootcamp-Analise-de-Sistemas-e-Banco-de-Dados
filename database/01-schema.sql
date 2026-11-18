@@ -78,6 +78,16 @@ CREATE TABLE dispositivo (
     nome_aparelho  text
 );
 
+-- Configuração das notificações: uma única linha, com o horário de silêncio (em horas, horário de Brasília)
+CREATE TABLE configuracao_notificacao (
+    id              integer PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+    silencio_ativo  boolean NOT NULL DEFAULT true,
+    silencio_inicio integer NOT NULL DEFAULT 22 CHECK (silencio_inicio BETWEEN 0 AND 23),
+    silencio_fim    integer NOT NULL DEFAULT 7  CHECK (silencio_fim BETWEEN 0 AND 23)
+);
+
+INSERT INTO configuracao_notificacao (id) VALUES (1);
+
 -- Gatilhos: mantêm o período e a situação da reserva iguais aos do evento
 CREATE FUNCTION fn_reserva_copia_evento() RETURNS trigger AS $$
 BEGIN

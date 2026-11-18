@@ -13,12 +13,14 @@ public class NotificacaoApplication : INotificacaoApplication
   private readonly INotificacaoRepository _notificacaoRepository;
   private readonly IDispositivoRepository _dispositivoRepository;
   private readonly IPushService _pushService;
+  private readonly IConfiguracaoApplication _configuracaoApplication;
 
-  public NotificacaoApplication(INotificacaoRepository notificacaoRepository, IDispositivoRepository dispositivoRepository, IPushService pushService)
+  public NotificacaoApplication(INotificacaoRepository notificacaoRepository, IDispositivoRepository dispositivoRepository, IPushService pushService, IConfiguracaoApplication configuracaoApplication)
   {
     _notificacaoRepository = notificacaoRepository;
     _dispositivoRepository = dispositivoRepository;
     _pushService = pushService;
+    _configuracaoApplication = configuracaoApplication;
   }
 
   public async Task<IEnumerable<Notificacao>> ListarAbertasAsync() => await _notificacaoRepository.ListarAbertasAsync();
@@ -36,6 +38,13 @@ public class NotificacaoApplication : INotificacaoApplication
   public async Task<ResultadoProcessamento> ProcessarPendentesAsync()
   {
     var agora = DateTime.UtcNow;
+
+    // Horário de silêncio (definido no app): os avisos vencidos ficam esperando e saem quando ele termina
+    var silencio = await _configuracaoApplication.ObterSilencioAsync();
+    if (AgendamentoHelper.EmHorarioDeSilencio(agora, silencio.SilencioAtivo, silencio.SilencioInicio, silencio.SilencioFim))
+      return new ResultadoProcessamento(0, 0, 0,
+        $"Horário de silêncio ({silencio.SilencioInicio}h às {silencio.SilencioFim}h): os avisos pendentes saem a partir das {silencio.SilencioFim}h.");
+
     var pendentes = (await _notificacaoRepository.ListarPendentesAteAsync(agora)).ToList();
     if (pendentes.Count == 0) return new ResultadoProcessamento(0, 0, 0, "Nenhuma notificação para enviar agora.");
 

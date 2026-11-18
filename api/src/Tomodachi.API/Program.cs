@@ -41,6 +41,8 @@ builder.Services.AddScoped<INotificacaoRepository, NotificacaoRepository>();
 builder.Services.AddScoped<INotificacaoApplication, NotificacaoApplication>();
 builder.Services.AddScoped<IDispositivoRepository, DispositivoRepository>();
 builder.Services.AddScoped<IDispositivoApplication, DispositivoApplication>();
+builder.Services.AddScoped<IConfiguracaoRepository, ConfiguracaoRepository>();
+builder.Services.AddScoped<IConfiguracaoApplication, ConfiguracaoApplication>();
 
 // PUSH: Firebase se houver credencial no .env; senão, só simula no log.
 // FIREBASE_CREDENTIALS_PATH = caminho do arquivo JSON (fora do repositório) ou FIREBASE_CREDENTIALS_JSON = conteúdo do JSON.

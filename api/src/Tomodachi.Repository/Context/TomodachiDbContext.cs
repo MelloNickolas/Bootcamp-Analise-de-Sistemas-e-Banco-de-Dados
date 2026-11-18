@@ -15,6 +15,7 @@ public class TomodachiDbContext : DbContext
   public DbSet<Video> Videos { get; set; } = null!;
   public DbSet<Notificacao> Notificacoes { get; set; } = null!;
   public DbSet<Dispositivo> Dispositivos { get; set; } = null!;
+  public DbSet<ConfiguracaoNotificacao> Configuracoes { get; set; } = null!;
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
@@ -25,5 +26,6 @@ public class TomodachiDbContext : DbContext
     modelBuilder.ApplyConfiguration(new VideoConfiguration());
     modelBuilder.ApplyConfiguration(new NotificacaoConfiguration());
     modelBuilder.ApplyConfiguration(new DispositivoConfiguration());
+    modelBuilder.ApplyConfiguration(new ConfiguracaoNotificacaoConfiguration());
   }
 }

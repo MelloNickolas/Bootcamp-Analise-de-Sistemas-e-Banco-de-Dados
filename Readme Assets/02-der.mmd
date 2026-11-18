@@ -53,3 +53,9 @@ erDiagram
         string token_fcm
         string nome_aparelho
     }
+    CONFIGURACAO_NOTIFICACAO {
+        int id PK "sempre 1"
+        bool silencio_ativo
+        int silencio_inicio "0 a 23"
+        int silencio_fim "0 a 23"
+    }

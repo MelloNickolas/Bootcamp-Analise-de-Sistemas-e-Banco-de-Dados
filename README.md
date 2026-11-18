@@ -41,6 +41,7 @@ Um sistema que:
 - Repetem a **cada 3 horas** até o item ser marcado como concluído ou confirmado no app.
 - Gravações e prazos de entrega repetem. O prazo de edição e o aviso de equipamento reservado são enviados uma vez só.
 - Todos os aparelhos cadastrados recebem os avisos.
+- **Horário de silêncio:** a equipe define em **Ajustes** o período em que nenhum aviso sai (padrão: 22h às 7h, horário de Brasília). O que venceu nesse período chega quando ele termina, e a sequência de 3 em 3 horas segue a partir dali. A configuração vale para todos.
 
 ### Fora desta versão
 
@@ -79,11 +80,11 @@ Criada pela Rafaela: tema escuro com destaque dourado (Champagne `#D6BD87`), fon
 
 ## 🗃️ Modelo de dados
 
-O banco tem **7 tabelas** no PostgreSQL. O código-fonte do diagrama está em [`Readme Assets/02-der.mmd`](Readme%20Assets/02-der.mmd).
+O banco tem **8 tabelas** no PostgreSQL. O código-fonte do diagrama está em [`Readme Assets/02-der.mmd`](Readme%20Assets/02-der.mmd).
 
 <div align="center">
 
-<img src="Readme%20Assets/02-der.png" alt="DER com as tabelas local, evento_gravacao, video, equipamento, reserva_equipamento, notificacao e dispositivo" width="900">
+<img src="Readme%20Assets/02-der.png" alt="DER com as tabelas local, evento_gravacao, video, equipamento, reserva_equipamento, notificacao, dispositivo e configuracao_notificacao" width="900">
 
 </div>
 
@@ -96,6 +97,7 @@ O banco tem **7 tabelas** no PostgreSQL. O código-fonte do diagrama está em [`
 | `video` | Vídeos a editar, com prazos e status (a editar, em edição, entregue). O evento de origem é opcional |
 | `notificacao` | Próximo envio, repetição e confirmação. Cada linha vem de um evento ou de um vídeo |
 | `dispositivo` | Aparelhos que recebem as notificações (token do Firebase) |
+| `configuracao_notificacao` | Linha única com o horário de silêncio dos avisos |
 
 ### Regras garantidas pelo próprio banco
 
@@ -109,7 +111,7 @@ O banco tem **7 tabelas** no PostgreSQL. O código-fonte do diagrama está em [`
 
 ### Banco funcionando
 
-Tabelas criadas no PostgreSQL 17:
+Tabelas criadas no PostgreSQL 17 (a imagem é da primeira versão, com 7 tabelas):
 
 <div align="center">
 
@@ -153,6 +155,7 @@ Fluxo entre as camadas: `API → Application → Repository → Domain`.
 | Vídeo | `ListarVideos`, `ObterVideo/{id}`, `CriarVideo`, `AtualizarVideo/{id}`, `AlterarStatusVideo/{id}`, `DeletarVideo/{id}` |
 | Aparelho | `RegistrarDispositivo`, `ListarDispositivos`, `RemoverDispositivo/{id}` |
 | Notificação | `ListarAbertas`, `ConfirmarNotificacao/{id}`, `ProcessarPendentes` |
+| Configuração | `ObterSilencio`, `AtualizarSilencio` |
 
 <div align="center">
 
@@ -193,6 +196,7 @@ A equipe inteira usa **uma senha só**, guardada no servidor (`APP_PASSWORD`). `
 - Ao criar um evento ou um vídeo, a API agenda os avisos: o primeiro sai **48 horas antes** do prazo ou da gravação.
 - Gravações e prazos de entrega **repetem a cada 3 horas** até o item ser concluído. O prazo de edição e o aviso de equipamento reservado são enviados **uma vez só**.
 - Os horários seguem o combinado (por exemplo 09:00, 12:00, 15:00), sem acumular atraso. Se o servidor ficar parado, a API pula para a próxima rodada que ainda está no futuro.
+- No horário de silêncio (guardado na tabela `configuracao_notificacao` e editável pelo app) o `ProcessarPendentes` não envia nada: os avisos vencidos esperam e saem quando ele termina, sem mandar vários de uma vez (cada aviso sai uma vez e já agenda o próximo horário depois do silêncio).
 - Concluir ou cancelar um evento, ou entregar um vídeo, encerra os avisos. Mudar um horário ou prazo reagenda o aviso.
 - Um agendador externo chama `POST /Notificacao/ProcessarPendentes` a cada minuto, com a chave `X-Job-Key` definida no servidor (`JOB_KEY`). O envio é feito pelo Firebase Cloud Messaging.
 
@@ -218,7 +222,7 @@ App em **React, TypeScript, Vite e Tailwind**, instalável na tela inicial do iP
 | Vídeos | Lista por situação, com botões para iniciar a edição e marcar como entregue |
 | Novo vídeo | Cadastro de um vídeo, com a gravação de origem (opcional) e os prazos de edição e entrega |
 | Cadastros | Equipamentos e locais: criar, editar e excluir (equipamentos podem ser desativados) |
-| Ajustes | Estado da conexão, ativação das notificações, instalação no iPhone e sair da conta |
+| Ajustes | Estado da conexão, ativação das notificações, horário de silêncio, instalação no iPhone e sair da conta |
 
 <div align="center">
 
@@ -286,6 +290,8 @@ psql -U postgres -d tomodachi -v ON_ERROR_STOP=1 -f database/02-dados-exemplo.sq
 
 O arquivo `database/03-testes-regras.sql` testa as regras, e cada teste indica o resultado esperado. Três deles falham de propósito.
 
+Quem já tinha o banco criado antes do horário de silêncio roda também `database/05-configuracao-notificacao.sql`, que cria a tabela nova sem mexer nos dados (pode ser repetido sem problema).
+
 ### API
 
 Precisa do .NET 9 SDK. A configuração fica no arquivo `api/.env`, que não vai para o GitHub:
@@ -342,7 +348,8 @@ npm run preview
 | Notificações push no iPhone | 28/11/2026 | ✅ Testadas em 15/11/2026 |
 | Login compartilhado | 28/11/2026 | ✅ Feito |
 | Telas de cadastro (vídeo, equipamento, local e reserva) | 28/11/2026 | ✅ Feito |
-| Limpar os dados de exemplo e cadastrar os dados reais da Tomodachi | 28/11/2026 | 🔜 A fazer |
+| Horário de silêncio das notificações, configurável no app | 28/11/2026 | ✅ Feito |
+| Limpar os dados de exemplo e cadastrar os dados reais da Tomodachi | 28/11/2026 | 🔜 Limpeza feita; falta cadastrar os dados reais |
 | Testes com a Tomodachi | 28/11/2026 | 🔜 A fazer |
 | Relatório final | 03/12/2026 | 🔜 A fazer |
 | Apresentação | 04 ou 05/12/2026 | 🔜 A confirmar |
