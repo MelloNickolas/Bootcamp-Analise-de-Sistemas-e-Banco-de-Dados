@@ -180,6 +180,14 @@ Tentar reservar a câmera num evento das 10:00 às 11:00, quando ela já está n
 
 </div>
 
+### Login da equipe
+
+A equipe inteira usa **uma senha só**, guardada no servidor (`APP_PASSWORD`). `POST /Auth/Login` confere a senha e devolve um token JWT, válido por 30 dias, que o app envia em todas as chamadas.
+
+- Todas as rotas exigem o token, exceto `/health`, o login e o disparo das notificações (que tem a própria chave, `X-Job-Key`).
+- O login aceita no máximo 5 tentativas por minuto para cada endereço.
+- O token é assinado com `JWT_SECRET`. Sair do app, ou o token vencer, pede a senha de novo.
+
 ### Notificações na API
 
 - Ao criar um evento ou um vídeo, a API agenda os avisos: o primeiro sai **48 horas antes** do prazo ou da gravação.
@@ -202,11 +210,12 @@ App em **React, TypeScript, Vite e Tailwind**, instalável na tela inicial do iP
 
 | Tela | O que faz |
 |---|---|
+| Entrar | Senha da equipe, pedida na primeira vez e depois de sair ou do token vencer |
 | Início | Resumo da semana e próximas gravações |
 | Calendário | Agenda do dia e da semana, com navegação entre as datas |
 | Vídeos | Lista por situação, com botões para iniciar a edição e marcar como entregue |
 | Nova gravação | Cadastro de uma gravação, com local, início e fim |
-| Ajustes | Estado da conexão, ativação das notificações e como instalar no iPhone |
+| Ajustes | Estado da conexão, ativação das notificações, instalação no iPhone e sair da conta |
 
 <div align="center">
 
@@ -244,7 +253,7 @@ No iPhone as notificações só funcionam com o app instalado e aberto pelo íco
 | Avisos | **cron-job.org** | Chama `ProcessarPendentes` a cada minuto |
 | Push | **Firebase Cloud Messaging** | Credencial guardada fora do repositório |
 
-Nenhum segredo fica no repositório. Os valores ficam em arquivos `.env` (ignorados pelo Git) e nos painéis dos serviços. As variáveis da API são `CONNECTION_STRING`, `CORS_ORIGINS`, `JOB_KEY`, `FIREBASE_CREDENTIALS_JSON` e `SWAGGER_ENABLED`. As do app começam com `VITE_`. Os modelos estão em `api/.env.example` e `pwa/.env.example`.
+Nenhum segredo fica no repositório. Os valores ficam em arquivos `.env` (ignorados pelo Git) e nos painéis dos serviços. As variáveis da API são `CONNECTION_STRING`, `CORS_ORIGINS`, `JOB_KEY`, `APP_PASSWORD`, `JWT_SECRET`, `FIREBASE_CREDENTIALS_JSON` e `SWAGGER_ENABLED`. As do app começam com `VITE_`. Os modelos estão em `api/.env.example` e `pwa/.env.example`.
 
 ---
 
@@ -279,7 +288,7 @@ O arquivo `database/03-testes-regras.sql` testa as regras, e cada teste indica o
 Precisa do .NET 9 SDK. A configuração fica no arquivo `api/.env`, que não vai para o GitHub:
 
 1. Copie `api/.env.example` para `api/.env`.
-2. Troque os valores marcados com `TROQUE_AQUI` (senha do banco e a chave `JOB_KEY`). Para enviar notificações de verdade, aponte `FIREBASE_CREDENTIALS_PATH` para o arquivo de credencial do Firebase, guardado fora do repositório. Sem ele, o envio é só simulado no log.
+2. Troque os valores marcados com `TROQUE_AQUI` (senha do banco, `JOB_KEY`, `APP_PASSWORD` e `JWT_SECRET`). Para enviar notificações de verdade, aponte `FIREBASE_CREDENTIALS_PATH` para o arquivo de credencial do Firebase, guardado fora do repositório. Sem ele, o envio é só simulado no log.
 3. Rode, a partir da pasta `api`:
 
 ```bash
@@ -328,7 +337,8 @@ npm run preview
 | API em .NET 9 e regras de negócio | 20/11/2026 | ✅ Feito |
 | App (PWA) | 20/11/2026 | ✅ Agenda, vídeos e nova gravação no ar |
 | Notificações push no iPhone | 28/11/2026 | ✅ Testadas em 15/11/2026 |
-| Login compartilhado e telas de cadastro (vídeo, equipamento, local e reserva) | 28/11/2026 | 🔜 A fazer |
+| Login compartilhado | 28/11/2026 | ✅ Feito |
+| Telas de cadastro (vídeo, equipamento, local e reserva) | 28/11/2026 | 🔜 A fazer |
 | Testes com a Tomodachi | 28/11/2026 | 🔜 A fazer |
 | Relatório final | 03/12/2026 | 🔜 A fazer |
 | Apresentação | 04 ou 05/12/2026 | 🔜 A confirmar |

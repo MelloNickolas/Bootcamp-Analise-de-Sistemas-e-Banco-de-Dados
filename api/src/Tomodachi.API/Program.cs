@@ -1,7 +1,14 @@
+using System.Text;
+using System.Threading.RateLimiting;
 using FirebaseAdmin;
 using FirebaseAdmin.Messaging;
 using Google.Apis.Auth.OAuth2;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Tomodachi.Application.Applications;
 using Tomodachi.Application.Interfaces;
 using Tomodachi.Repository.Context;
@@ -58,11 +65,70 @@ var origens = (builder.Configuration["CORS_ORIGINS"] ?? "http://localhost:5173")
   .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 builder.Services.AddCors(opcoes => opcoes.AddDefaultPolicy(politica => politica.WithOrigins(origens).AllowAnyHeader().AllowAnyMethod()));
 
+// LOGIN: senha única da equipe (APP_PASSWORD) e token JWT assinado com JWT_SECRET
+var senhaDaEquipe = builder.Configuration["APP_PASSWORD"];
+var segredoJwt = builder.Configuration["JWT_SECRET"];
+if (string.IsNullOrWhiteSpace(senhaDaEquipe))
+  throw new Exception("Defina APP_PASSWORD no arquivo .env (veja api/.env.example).");
+if (string.IsNullOrWhiteSpace(segredoJwt) || segredoJwt.Length < 32)
+  throw new Exception("Defina JWT_SECRET com pelo menos 32 caracteres no arquivo .env (veja api/.env.example).");
+
+var diasDoToken = int.TryParse(builder.Configuration["JWT_DIAS"], out var dias) && dias > 0 ? dias : 30;
+builder.Services.AddSingleton<ITokenService>(new TokenService(segredoJwt, diasDoToken));
+builder.Services.AddScoped<IAuthApplication>(sp => new AuthApplication(senhaDaEquipe, sp.GetRequiredService<ITokenService>()));
+
+builder.Services
+  .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+  .AddJwtBearer(opcoes => opcoes.TokenValidationParameters = new TokenValidationParameters
+  {
+    ValidateIssuer = false,
+    ValidateAudience = false,
+    ValidateLifetime = true,
+    ValidateIssuerSigningKey = true,
+    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(segredoJwt)),
+    ClockSkew = TimeSpan.FromMinutes(1)
+  });
+builder.Services.AddAuthorization();
+
+// No máximo 5 tentativas de login por minuto para cada endereço
+builder.Services.AddRateLimiter(opcoes =>
+{
+  opcoes.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+  opcoes.AddPolicy("login", contexto => RateLimitPartition.GetFixedWindowLimiter(
+    contexto.Connection.RemoteIpAddress?.ToString() ?? "desconhecido",
+    _ => new FixedWindowRateLimiterOptions { PermitLimit = 5, Window = TimeSpan.FromMinutes(1) }));
+});
+
+// O Render fica na frente da API: lê o endereço real de quem chamou
+builder.Services.Configure<ForwardedHeadersOptions>(opcoes =>
+{
+  opcoes.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+  opcoes.KnownNetworks.Clear();
+  opcoes.KnownProxies.Clear();
+});
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(opcoes =>
+{
+  opcoes.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+  {
+    Name = "Authorization",
+    Type = SecuritySchemeType.Http,
+    Scheme = "bearer",
+    BearerFormat = "JWT",
+    In = ParameterLocation.Header,
+    Description = "Cole o token devolvido pelo /Auth/Login."
+  });
+  opcoes.AddSecurityRequirement(new OpenApiSecurityRequirement
+  {
+    { new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" } }, Array.Empty<string>() }
+  });
+});
 
 var app = builder.Build();
+
+app.UseForwardedHeaders();
 
 // Swagger só no desenvolvimento, ou em produção quando SWAGGER_ENABLED=true
 if (app.Environment.IsDevelopment() || builder.Configuration["SWAGGER_ENABLED"] == "true")
@@ -72,6 +138,9 @@ if (app.Environment.IsDevelopment() || builder.Configuration["SWAGGER_ENABLED"] 
 }
 
 app.UseCors();
+app.UseRateLimiter();
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllers();
 app.MapGet("/health", () => Results.Ok(new { status = "ok" })); // keep-alive, sem banco
 

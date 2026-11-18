@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Tomodachi.Application.Interfaces;
 using Tomodachi.Domain.Entities;
@@ -7,6 +8,7 @@ using Tomodachi.Repository.DTOs.Notificacoes;
 
 namespace Tomodachi.API.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("[controller]")]
 public class NotificacaoController : ControllerBase
@@ -42,7 +44,9 @@ public class NotificacaoController : ControllerBase
     catch (Exception ex) { return BadRequest(new { mensagem = ex.Message }); }
   }
 
-  // Chamado a cada minuto por um agendador externo, com a chave do .env no cabeçalho X-Job-Key
+  // Chamado a cada minuto por um agendador externo, com a chave do .env no cabeçalho X-Job-Key.
+  // Não usa o login da equipe: quem protege esta rota é a chave.
+  [AllowAnonymous]
   [HttpPost]
   [Route("ProcessarPendentes")]
   public async Task<ActionResult> ProcessarPendentes([FromHeader(Name = "X-Job-Key")] string? chave)

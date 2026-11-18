@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { Bell, BellRing, Smartphone, Wifi, WifiOff } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Bell, BellRing, LogOut, Smartphone, Wifi, WifiOff } from 'lucide-react';
+import { limparSessao } from '../lib/auth';
 import { Cabecalho } from '../components/Cabecalho';
 import { useCarregar } from '../hooks/useCarregar';
 import { mensagemDeErro } from '../lib/api';
@@ -8,7 +10,13 @@ import DispositivoApi from '../services/dispositivoApi';
 import LocalApi from '../services/localApi';
 
 export default function Ajustes() {
+  const navegar = useNavigate();
   const saude = useCarregar(() => LocalApi.saude(), []);
+
+  function sair() {
+    limparSessao();
+    navegar('/entrar', { replace: true });
+  }
   const conectado = saude.dados === true;
 
   const [ativadas, setAtivadas] = useState(Boolean(tokenSalvo()));
@@ -82,6 +90,21 @@ export default function Ajustes() {
               </p>
             )}
           </div>
+        </div>
+      </section>
+
+      <section className="cartao entra mt-3 p-4" style={{ animationDelay: '90ms' }} aria-labelledby="conta">
+        <div className="flex items-center gap-3">
+          <LogOut className="text-accent-text" aria-hidden="true" />
+          <div className="flex-1">
+            <h2 id="conta" className="font-bold">
+              Conta
+            </h2>
+            <p className="text-sm text-muted">Sair pede a senha da equipe de novo neste aparelho.</p>
+          </div>
+          <button type="button" className="btn-suave" onClick={sair}>
+            Sair
+          </button>
         </div>
       </section>
 

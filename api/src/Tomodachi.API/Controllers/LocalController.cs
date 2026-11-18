@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Tomodachi.Application.Interfaces;
 using Tomodachi.Domain.Entities;
@@ -5,6 +6,7 @@ using Tomodachi.Repository.DTOs.Locais;
 
 namespace Tomodachi.API.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("[controller]")]
 public class LocalController : ControllerBase
