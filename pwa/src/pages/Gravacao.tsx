@@ -34,6 +34,14 @@ export default function Gravacao() {
   const editavel = dados?.status === 'agendado';
   const jaReservados = new Set((dados?.reservas ?? []).map((r) => r.equipamentoID));
   const disponiveis = (equipamentos.dados ?? []).filter((e) => e.ativo && !jaReservados.has(e.id));
+  // Agrupa por categoria para a lista ficar fácil de percorrer
+  const gruposDisponiveis = Object.entries(
+    disponiveis.reduce<Record<string, typeof disponiveis>>((grupos, e) => {
+      const chave = e.categoria ?? 'Sem categoria';
+      (grupos[chave] ??= []).push(e);
+      return grupos;
+    }, {})
+  );
 
   async function reservar() {
     if (!escolhido) return;
@@ -142,10 +150,14 @@ export default function Gravacao() {
                 <div className="flex gap-2">
                   <select id="novo-equip" className="campo" value={escolhido} onChange={(e) => setEscolhido(e.target.value)} disabled={equipamentos.carregando || ocupado}>
                     <option value="">{disponiveis.length === 0 ? 'Nenhum disponível' : 'Escolha um equipamento'}</option>
-                    {disponiveis.map((e) => (
-                      <option key={e.id} value={e.id}>
-                        {e.nome}
-                      </option>
+                    {gruposDisponiveis.map(([categoria, itens]) => (
+                      <optgroup key={categoria} label={categoria}>
+                        {itens.map((e) => (
+                          <option key={e.id} value={e.id}>
+                            {e.nome}
+                          </option>
+                        ))}
+                      </optgroup>
                     ))}
                   </select>
                   <button type="button" className="btn-ouro !px-4" onClick={reservar} disabled={!escolhido || ocupado} aria-label="Reservar">

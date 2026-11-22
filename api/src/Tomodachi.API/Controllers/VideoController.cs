@@ -85,6 +85,7 @@ public class VideoController : ControllerBase
     ID = video.ID,
     Titulo = video.Titulo,
     EventoID = video.EventoID,
+    ClienteID = video.Evento?.ClienteID,
     Evento = video.Evento?.Titulo,
     Status = video.Status,
     PrazoEdicao = video.PrazoEdicao.ToUniversalTime(),

@@ -34,7 +34,7 @@ export default function NovoVideo() {
         prazoEdicao: paraIsoBrasilia(prazoEdicao),
         prazoEntrega: paraIsoBrasilia(prazoEntrega)
       });
-      navegar('/videos', { replace: true });
+      navegar('/agendar', { replace: true });
     } catch (e) {
       setErro(mensagemDeErro(e));
     } finally {
@@ -45,10 +45,10 @@ export default function NovoVideo() {
   return (
     <main className="mx-auto w-full max-w-lg px-5 pb-10">
       <header className="flex items-center gap-2 pt-[max(1rem,env(safe-area-inset-top))] pb-2">
-        <Link to="/videos" aria-label="Voltar" className="btn-suave !px-3">
+        <Link to="/agendar" aria-label="Voltar" className="btn-suave !px-3">
           <ArrowLeft size={20} aria-hidden="true" />
         </Link>
-        <h1 className="text-2xl font-extrabold">Novo vídeo</h1>
+        <h1 className="text-2xl font-extrabold">Agendar edição</h1>
       </header>
 
       <form onSubmit={enviar} className="entra mt-4 space-y-5" noValidate>
@@ -97,7 +97,7 @@ export default function NovoVideo() {
         )}
 
         <button type="submit" className="btn-ouro w-full" disabled={salvando}>
-          {salvando ? 'Salvando...' : 'Salvar vídeo'}
+          {salvando ? 'Salvando...' : 'Agendar edição'}
         </button>
       </form>
     </main>

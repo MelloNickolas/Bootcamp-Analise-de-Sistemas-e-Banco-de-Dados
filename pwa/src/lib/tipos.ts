@@ -23,6 +23,7 @@ export interface Video {
   id: number;
   titulo: string;
   eventoID: number | null;
+  clienteID: number | null;
   evento: string | null;
   status: StatusVideo;
   prazoEdicao: string;
@@ -40,6 +41,13 @@ export interface Equipamento {
   nome: string;
   descricao: string | null;
   ativo: boolean;
+  categoriaID: number | null;
+  categoria: string | null;
+}
+
+export interface Categoria {
+  id: number;
+  nome: string;
 }
 
 export interface Cliente {

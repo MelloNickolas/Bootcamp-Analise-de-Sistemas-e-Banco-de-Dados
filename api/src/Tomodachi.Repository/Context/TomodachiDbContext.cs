@@ -11,6 +11,7 @@ public class TomodachiDbContext : DbContext
   public DbSet<Local> Locais { get; set; } = null!;
   public DbSet<Cliente> Clientes { get; set; } = null!;
   public DbSet<Equipamento> Equipamentos { get; set; } = null!;
+  public DbSet<CategoriaEquipamento> Categorias { get; set; } = null!;
   public DbSet<EventoGravacao> Eventos { get; set; } = null!;
   public DbSet<ReservaEquipamento> Reservas { get; set; } = null!;
   public DbSet<Video> Videos { get; set; } = null!;
@@ -22,6 +23,7 @@ public class TomodachiDbContext : DbContext
   {
     modelBuilder.ApplyConfiguration(new LocalConfiguration());
     modelBuilder.ApplyConfiguration(new ClienteConfiguration());
+    modelBuilder.ApplyConfiguration(new CategoriaEquipamentoConfiguration());
     modelBuilder.ApplyConfiguration(new EquipamentoConfiguration());
     modelBuilder.ApplyConfiguration(new EventoGravacaoConfiguration());
     modelBuilder.ApplyConfiguration(new ReservaEquipamentoConfiguration());

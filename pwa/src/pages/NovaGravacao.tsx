@@ -65,10 +65,10 @@ export default function NovaGravacao() {
   return (
     <main className="mx-auto w-full max-w-lg px-5 pb-10">
       <header className="flex items-center gap-2 pt-[max(1rem,env(safe-area-inset-top))] pb-2">
-        <Link to="/" aria-label="Voltar" className="btn-suave !px-3">
+        <Link to="/agendar" aria-label="Voltar" className="btn-suave !px-3">
           <ArrowLeft size={20} aria-hidden="true" />
         </Link>
-        <h1 className="text-2xl font-extrabold">Nova gravação</h1>
+        <h1 className="text-2xl font-extrabold">Agendar gravação</h1>
       </header>
 
       <form onSubmit={enviar} className="entra mt-4 space-y-5" noValidate>
@@ -159,7 +159,7 @@ export default function NovaGravacao() {
         )}
 
         <button type="submit" className="btn-ouro w-full" disabled={salvando}>
-          {salvando ? 'Salvando...' : 'Salvar gravação'}
+          {salvando ? 'Salvando...' : 'Agendar gravação'}
         </button>
       </form>
     </main>

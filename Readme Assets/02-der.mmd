@@ -2,6 +2,7 @@ erDiagram
     LOCAL ||--o{ EVENTO_GRAVACAO : "recebe"
     CLIENTE |o--o{ EVENTO_GRAVACAO : "contrata"
     EVENTO_GRAVACAO ||--o{ RESERVA_EQUIPAMENTO : "tem"
+    CATEGORIA_EQUIPAMENTO |o--o{ EQUIPAMENTO : "agrupa"
     EQUIPAMENTO ||--o{ RESERVA_EQUIPAMENTO : "e reservado em"
     EVENTO_GRAVACAO |o--o{ VIDEO : "gera"
     EVENTO_GRAVACAO ||--o{ NOTIFICACAO : "origina"
@@ -17,6 +18,7 @@ erDiagram
         string nome
         string descricao
         bool ativo
+        int categoria_id FK "opcional"
     }
     EVENTO_GRAVACAO {
         int id PK
@@ -66,4 +68,8 @@ erDiagram
         string nome
         string cor "#RRGGBB"
         string logo "imagem em texto"
+    }
+    CATEGORIA_EQUIPAMENTO {
+        int id PK
+        string nome
     }

@@ -36,7 +36,7 @@ public class EquipamentoController : ControllerBase
   {
     try
     {
-      var equipamento = new Equipamento { Nome = request.Nome, Descricao = request.Descricao, Ativo = request.Ativo };
+      var equipamento = new Equipamento { Nome = request.Nome, Descricao = request.Descricao, Ativo = request.Ativo, CategoriaID = request.CategoriaID };
       return Ok(await _equipamentoApplication.CriarEquipamentoAsync(equipamento));
     }
     catch (Exception ex) { return BadRequest(new { mensagem = ex.Message }); }
@@ -49,7 +49,7 @@ public class EquipamentoController : ControllerBase
     try
     {
       await _equipamentoApplication.AtualizarEquipamentoAsync(
-        new Equipamento { ID = id, Nome = request.Nome, Descricao = request.Descricao, Ativo = request.Ativo });
+        new Equipamento { ID = id, Nome = request.Nome, Descricao = request.Descricao, Ativo = request.Ativo, CategoriaID = request.CategoriaID });
       return Ok();
     }
     catch (Exception ex) { return BadRequest(new { mensagem = ex.Message }); }
@@ -68,5 +68,5 @@ public class EquipamentoController : ControllerBase
   }
 
   private static EquipamentoResponse MapearResponse(Equipamento equipamento) => new()
-  { ID = equipamento.ID, Nome = equipamento.Nome, Descricao = equipamento.Descricao, Ativo = equipamento.Ativo };
+  { ID = equipamento.ID, Nome = equipamento.Nome, Descricao = equipamento.Descricao, Ativo = equipamento.Ativo, CategoriaID = equipamento.CategoriaID, Categoria = equipamento.Categoria?.Nome };
 }

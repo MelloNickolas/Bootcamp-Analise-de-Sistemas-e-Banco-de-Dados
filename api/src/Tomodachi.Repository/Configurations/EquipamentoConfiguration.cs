@@ -14,5 +14,8 @@ public class EquipamentoConfiguration : IEntityTypeConfiguration<Equipamento>
     builder.Property(equipamento => equipamento.Nome).HasColumnName("nome").IsRequired(true);
     builder.Property(equipamento => equipamento.Descricao).HasColumnName("descricao").IsRequired(false);
     builder.Property(equipamento => equipamento.Ativo).HasColumnName("ativo");
+    builder.Property(equipamento => equipamento.CategoriaID).HasColumnName("categoria_id").IsRequired(false);
+
+    builder.HasOne(equipamento => equipamento.Categoria).WithMany().HasForeignKey(equipamento => equipamento.CategoriaID).OnDelete(DeleteBehavior.SetNull);
   }
 }

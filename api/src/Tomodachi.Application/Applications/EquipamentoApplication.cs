@@ -23,6 +23,7 @@ public class EquipamentoApplication : IEquipamentoApplication
     existente.Nome = equipamento.Nome;
     existente.Descricao = equipamento.Descricao;
     existente.Ativo = equipamento.Ativo;
+    existente.CategoriaID = equipamento.CategoriaID;
     await _equipamentoRepository.AtualizarAsync(existente);
   }
 

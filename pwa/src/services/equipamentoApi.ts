@@ -5,6 +5,7 @@ export interface DadosEquipamento {
   nome: string;
   descricao: string | null;
   ativo: boolean;
+  categoriaID: number | null;
 }
 
 const EquipamentoApi = {

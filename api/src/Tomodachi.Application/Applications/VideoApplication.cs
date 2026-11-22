@@ -80,6 +80,20 @@ public class VideoApplication : IVideoApplication
       PrazoEntrega = existente.PrazoEntrega
     });
 
+    // Voltou de "entregue" (precisa de correção): o aviso do prazo de entrega volta a valer
+    if (existente.Status == StatusVideo.Entregue && status != StatusVideo.Entregue)
+    {
+      await _notificacaoRepository.SalvarAsync(new Notificacao
+      {
+        VideoID = id, Tipo = TipoNotificacao.PrazoEntrega, ProximoEnvio = AgendamentoHelper.PrimeiroEnvio(existente.PrazoEntrega), Repete = true
+      });
+      if (status == StatusVideo.AEditar)
+        await _notificacaoRepository.SalvarAsync(new Notificacao
+        {
+          VideoID = id, Tipo = TipoNotificacao.PrazoEdicao, ProximoEnvio = AgendamentoHelper.PrimeiroEnvio(existente.PrazoEdicao), Repete = false
+        });
+    }
+
     // Entregue: nenhum aviso mais. Em edição: o aviso do prazo de edição não é mais necessário.
     foreach (var notificacao in await _notificacaoRepository.ListarAbertasPorItemAsync(null, existente.ID))
     {

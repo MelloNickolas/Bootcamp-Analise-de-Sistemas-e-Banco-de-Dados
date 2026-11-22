@@ -10,12 +10,19 @@ CREATE TABLE local (
     endereco  text
 );
 
+-- Categorias de equipamento (câmeras, lentes, áudio, iluminação...)
+CREATE TABLE categoria_equipamento (
+    id    serial PRIMARY KEY,
+    nome  text NOT NULL UNIQUE
+);
+
 -- Equipamentos disponíveis para reserva
 CREATE TABLE equipamento (
-    id         serial PRIMARY KEY,
-    nome       text NOT NULL UNIQUE,
-    descricao  text,
-    ativo      boolean NOT NULL DEFAULT true
+    id            serial PRIMARY KEY,
+    nome          text NOT NULL UNIQUE,
+    descricao     text,
+    ativo         boolean NOT NULL DEFAULT true,
+    categoria_id  integer REFERENCES categoria_equipamento (id) ON DELETE SET NULL
 );
 
 -- Clientes (empresas): nome, cor e logo (imagem pequena em formato de texto, "data:image/...")

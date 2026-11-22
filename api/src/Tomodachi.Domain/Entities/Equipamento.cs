@@ -6,4 +6,7 @@ public class Equipamento
   public string Nome { get; set; } = string.Empty;
   public string? Descricao { get; set; }
   public bool Ativo { get; set; } = true;
+  public int? CategoriaID { get; set; }
+
+  public CategoriaEquipamento? Categoria { get; set; }
 }
