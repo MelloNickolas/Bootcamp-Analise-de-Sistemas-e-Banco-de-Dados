@@ -80,18 +80,19 @@ Criada pela Rafaela: tema escuro com destaque dourado (Champagne `#D6BD87`), fon
 
 ## 🗃️ Modelo de dados
 
-O banco tem **8 tabelas** no PostgreSQL. O código-fonte do diagrama está em [`Readme Assets/02-der.mmd`](Readme%20Assets/02-der.mmd).
+O banco tem **9 tabelas** no PostgreSQL. O código-fonte do diagrama está em [`Readme Assets/02-der.mmd`](Readme%20Assets/02-der.mmd).
 
 <div align="center">
 
-<img src="Readme%20Assets/02-der.png" alt="DER com as tabelas local, evento_gravacao, video, equipamento, reserva_equipamento, notificacao, dispositivo e configuracao_notificacao" width="900">
+<img src="Readme%20Assets/02-der.png" alt="DER com as tabelas local, cliente, evento_gravacao, video, equipamento, reserva_equipamento, notificacao, dispositivo e configuracao_notificacao" width="900">
 
 </div>
 
 | Tabela | O que guarda |
 |---|---|
 | `local` | Locais de gravação |
-| `evento_gravacao` | Gravações, com horário e status (agendado, realizado, cancelado) |
+| `cliente` | Empresas para as quais a Tomodachi grava: nome, cor e logo (imagem pequena guardada como texto) |
+| `evento_gravacao` | Gravações, com horário, cliente (opcional) e status (agendado, realizado, cancelado). Dia inteiro é uma gravação da meia-noite à meia-noite |
 | `equipamento` | Equipamentos disponíveis para reserva |
 | `reserva_equipamento` | Equipamento em um evento (N:N), sem sobreposição de horário |
 | `video` | Vídeos a editar, com prazos e status (a editar, em edição, entregue). O evento de origem é opcional |
@@ -111,7 +112,7 @@ O banco tem **8 tabelas** no PostgreSQL. O código-fonte do diagrama está em [`
 
 ### Banco funcionando
 
-Tabelas criadas no PostgreSQL 17 (a imagem é da primeira versão, com 7 tabelas):
+Tabelas criadas no PostgreSQL 17 (a imagem é da primeira versão, com 7 das 9 tabelas):
 
 <div align="center">
 
@@ -150,7 +151,8 @@ Fluxo entre as camadas: `API → Application → Repository → Domain`.
 |---|---|
 | Local | `ListarLocais`, `ObterLocal/{id}`, `CriarLocal`, `AtualizarLocal/{id}`, `DeletarLocal/{id}` |
 | Equipamento | `ListarEquipamentos`, `ObterEquipamento/{id}`, `CriarEquipamento`, `AtualizarEquipamento/{id}`, `DeletarEquipamento/{id}` |
-| Evento | `ListarEventos`, `ListarEventosDoDia`, `ListarEventosDaSemana`, `ObterEvento/{id}`, `CriarEvento`, `AtualizarEvento/{id}`, `CancelarEvento/{id}`, `ConcluirEvento/{id}` |
+| Cliente | `ListarClientes`, `ObterCliente/{id}`, `CriarCliente`, `AtualizarCliente/{id}`, `DeletarCliente/{id}` |
+| Evento | `ListarEventos`, `ListarEventosDoDia`, `ListarEventosDaSemana`, `ListarEventosDoMes`, `ObterEvento/{id}`, `CriarEvento`, `AtualizarEvento/{id}`, `CancelarEvento/{id}`, `ConcluirEvento/{id}` |
 | Reserva | `ReservarEquipamento`, `LiberarEquipamento` |
 | Vídeo | `ListarVideos`, `ObterVideo/{id}`, `CriarVideo`, `AtualizarVideo/{id}`, `AlterarStatusVideo/{id}`, `DeletarVideo/{id}` |
 | Aparelho | `RegistrarDispositivo`, `ListarDispositivos`, `RemoverDispositivo/{id}` |
@@ -216,12 +218,12 @@ App em **React, TypeScript, Vite e Tailwind**, instalável na tela inicial do iP
 |---|---|
 | Entrar | Senha da equipe, pedida na primeira vez e depois de sair ou do token vencer |
 | Início | Resumo da semana e próximas gravações |
-| Calendário | Agenda do dia e da semana, com navegação entre as datas |
+| Calendário | Agenda do dia, da semana e do mês, com navegação entre as datas. Cada gravação aparece com a cor e a logo do cliente |
 | Gravação | Detalhes de uma gravação, com reserva e liberação de equipamentos, concluir e cancelar |
-| Nova gravação | Cadastro de uma gravação, com local, início e fim. Em seguida abre a gravação para reservar equipamentos |
+| Nova gravação | Cadastro de uma gravação, com cliente (opcional), local e horário, ou "dia inteiro". Em seguida abre a gravação para reservar equipamentos |
 | Vídeos | Lista por situação, com botões para iniciar a edição e marcar como entregue |
 | Novo vídeo | Cadastro de um vídeo, com a gravação de origem (opcional) e os prazos de edição e entrega |
-| Cadastros | Equipamentos e locais: criar, editar e excluir (equipamentos podem ser desativados) |
+| Cadastros | Clientes (nome, cor e logo), equipamentos e locais: criar, editar e excluir (equipamentos podem ser desativados) |
 | Ajustes | Estado da conexão, ativação das notificações, horário de silêncio, instalação no iPhone e sair da conta |
 
 <div align="center">
@@ -290,7 +292,7 @@ psql -U postgres -d tomodachi -v ON_ERROR_STOP=1 -f database/02-dados-exemplo.sq
 
 O arquivo `database/03-testes-regras.sql` testa as regras, e cada teste indica o resultado esperado. Três deles falham de propósito.
 
-Quem já tinha o banco criado antes do horário de silêncio roda também `database/05-configuracao-notificacao.sql`, que cria a tabela nova sem mexer nos dados (pode ser repetido sem problema).
+Quem já tinha o banco criado antes dessas funções roda também, nesta ordem, `database/05-configuracao-notificacao.sql` (horário de silêncio) e `database/06-clientes.sql` (clientes), que criam o que falta sem mexer nos dados (podem ser repetidos sem problema).
 
 ### API
 
@@ -349,6 +351,7 @@ npm run preview
 | Login compartilhado | 28/11/2026 | ✅ Feito |
 | Telas de cadastro (vídeo, equipamento, local e reserva) | 28/11/2026 | ✅ Feito |
 | Horário de silêncio das notificações, configurável no app | 28/11/2026 | ✅ Feito |
+| Clientes com cor e logo, dia inteiro e calendário mensal | 28/11/2026 | ✅ Feito |
 | Limpar os dados de exemplo e cadastrar os dados reais da Tomodachi | 28/11/2026 | 🔜 Limpeza feita; falta cadastrar os dados reais |
 | Testes com a Tomodachi | 28/11/2026 | 🔜 A fazer |
 | Relatório final | 03/12/2026 | 🔜 A fazer |

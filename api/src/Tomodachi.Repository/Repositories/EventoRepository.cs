@@ -13,9 +13,16 @@ public class EventoRepository : BaseRepository, IEventoRepository
 
   public async Task<int> SalvarAsync(EventoGravacao evento)
   {
-    _context.Eventos.Add(evento);
-    await _context.SaveChangesAsync();
-    return evento.ID;
+    try
+    {
+      _context.Eventos.Add(evento);
+      await _context.SaveChangesAsync();
+      return evento.ID;
+    }
+    catch (DbUpdateException ex)
+    {
+      throw TraduzirErro(ex);
+    }
   }
 
   public async Task AtualizarAsync(EventoGravacao evento)
@@ -81,7 +88,7 @@ public class EventoRepository : BaseRepository, IEventoRepository
       if (erro.SqlState == PostgresErrorCodes.UniqueViolation)
         return new Exception("Esse equipamento já está reservado neste evento.");
       if (erro.SqlState == PostgresErrorCodes.ForeignKeyViolation)
-        return new Exception("Evento, local ou equipamento não localizado.");
+        return new Exception("Evento, local, cliente ou equipamento não localizado.");
     }
     return ex;
   }

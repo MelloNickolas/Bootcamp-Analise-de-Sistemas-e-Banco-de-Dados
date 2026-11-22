@@ -45,6 +45,7 @@ public class EventoApplication : IEventoApplication
       ID = existente.ID,
       Titulo = evento.Titulo,
       LocalID = evento.LocalID,
+      ClienteID = evento.ClienteID,
       Inicio = evento.Inicio,
       Fim = evento.Fim,
       Status = string.IsNullOrWhiteSpace(evento.Status) ? existente.Status : evento.Status
@@ -85,6 +86,13 @@ public class EventoApplication : IEventoApplication
   {
     var agora = DateTime.UtcNow;
     return await _eventoRepository.ListarPorPeriodoAsync(agora.AddDays(-30), agora.AddDays(365));
+  }
+
+  public async Task<IEnumerable<EventoGravacao>> ListarEventosDoMesAsync(DateOnly data)
+  {
+    var primeiroDia = new DateOnly(data.Year, data.Month, 1);
+    var (inicio, fim) = LimitesEmUtc(primeiroDia, DateTime.DaysInMonth(data.Year, data.Month));
+    return await _eventoRepository.ListarPorPeriodoAsync(inicio, fim);
   }
 
   public async Task<IEnumerable<EventoGravacao>> ListarEventosDoDiaAsync(DateOnly data)
@@ -140,6 +148,7 @@ public class EventoApplication : IEventoApplication
       ID = existente.ID,
       Titulo = existente.Titulo,
       LocalID = existente.LocalID,
+      ClienteID = existente.ClienteID,
       Inicio = existente.Inicio,
       Fim = existente.Fim,
       Status = status

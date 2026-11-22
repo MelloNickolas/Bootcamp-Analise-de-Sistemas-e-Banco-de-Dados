@@ -9,6 +9,7 @@ public class TomodachiDbContext : DbContext
   public TomodachiDbContext(DbContextOptions<TomodachiDbContext> options) : base(options) { }
 
   public DbSet<Local> Locais { get; set; } = null!;
+  public DbSet<Cliente> Clientes { get; set; } = null!;
   public DbSet<Equipamento> Equipamentos { get; set; } = null!;
   public DbSet<EventoGravacao> Eventos { get; set; } = null!;
   public DbSet<ReservaEquipamento> Reservas { get; set; } = null!;
@@ -20,6 +21,7 @@ public class TomodachiDbContext : DbContext
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
     modelBuilder.ApplyConfiguration(new LocalConfiguration());
+    modelBuilder.ApplyConfiguration(new ClienteConfiguration());
     modelBuilder.ApplyConfiguration(new EquipamentoConfiguration());
     modelBuilder.ApplyConfiguration(new EventoGravacaoConfiguration());
     modelBuilder.ApplyConfiguration(new ReservaEquipamentoConfiguration());

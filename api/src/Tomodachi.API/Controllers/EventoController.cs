@@ -24,6 +24,14 @@ public class EventoController : ControllerBase
   }
 
   [HttpGet]
+  [Route("ListarEventosDoMes")]
+  public async Task<ActionResult> ListarEventosDoMes([FromQuery] DateOnly? data)
+  {
+    try { return Ok((await _eventoApplication.ListarEventosDoMesAsync(data ?? Hoje())).Select(MapearResponse)); }
+    catch (Exception ex) { return BadRequest(new { mensagem = ex.Message }); }
+  }
+
+  [HttpGet]
   [Route("ListarEventosDaSemana")]
   public async Task<ActionResult> ListarEventosDaSemana([FromQuery] DateOnly? data)
   {
@@ -55,7 +63,7 @@ public class EventoController : ControllerBase
   {
     try
     {
-      var evento = new EventoGravacao { Titulo = request.Titulo, LocalID = request.LocalID, Inicio = request.Inicio, Fim = request.Fim };
+      var evento = new EventoGravacao { Titulo = request.Titulo, LocalID = request.LocalID, ClienteID = request.ClienteID, Inicio = request.Inicio, Fim = request.Fim };
       return Ok(await _eventoApplication.CriarEventoAsync(evento));
     }
     catch (Exception ex) { return BadRequest(new { mensagem = ex.Message }); }
@@ -69,7 +77,7 @@ public class EventoController : ControllerBase
     {
       var evento = new EventoGravacao
       {
-        ID = id, Titulo = request.Titulo, LocalID = request.LocalID, Inicio = request.Inicio, Fim = request.Fim, Status = request.Status ?? string.Empty
+        ID = id, Titulo = request.Titulo, LocalID = request.LocalID, ClienteID = request.ClienteID, Inicio = request.Inicio, Fim = request.Fim, Status = request.Status ?? string.Empty
       };
       await _eventoApplication.AtualizarEventoAsync(evento);
       return Ok();
@@ -129,6 +137,7 @@ public class EventoController : ControllerBase
     ID = evento.ID,
     Titulo = evento.Titulo,
     LocalID = evento.LocalID,
+    ClienteID = evento.ClienteID,
     Local = evento.Local?.Nome,
     Inicio = evento.Inicio.ToUniversalTime(),
     Fim = evento.Fim.ToUniversalTime(),

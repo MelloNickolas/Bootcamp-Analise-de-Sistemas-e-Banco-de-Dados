@@ -4,6 +4,7 @@ import type { Evento } from '../lib/tipos';
 export interface NovoEvento {
   titulo: string;
   localID: number;
+  clienteID: number | null;
   inicio: string;
   fim: string;
 }
@@ -14,6 +15,9 @@ const EventoApi = {
   },
   async listarSemana(data: string): Promise<Evento[]> {
     return (await api.get('/Evento/ListarEventosDaSemana', { params: { data } })).data;
+  },
+  async listarMes(data: string): Promise<Evento[]> {
+    return (await api.get('/Evento/ListarEventosDoMes', { params: { data } })).data;
   },
   async listarTodos(): Promise<Evento[]> {
     return (await api.get('/Evento/ListarEventos')).data;

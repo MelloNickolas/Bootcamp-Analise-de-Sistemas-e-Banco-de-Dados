@@ -1,7 +1,7 @@
 const FUSO = 'America/Sao_Paulo';
 
 const formatoDia = new Intl.DateTimeFormat('en-CA', { timeZone: FUSO, year: 'numeric', month: '2-digit', day: '2-digit' });
-const formatoHora = new Intl.DateTimeFormat('pt-BR', { timeZone: FUSO, hour: '2-digit', minute: '2-digit', hour12: false });
+const formatoHora = new Intl.DateTimeFormat('pt-BR', { timeZone: FUSO, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
 
 // Datas "AAAA-MM-DD" no horário de Brasília
 
@@ -68,4 +68,40 @@ export function prazoRelativo(iso: string): { texto: string; atrasado: boolean }
 // Valor de <input type="datetime-local"> ("2026-11-20T09:00") para o formato que a API espera
 export function paraIsoBrasilia(valorLocal: string): string {
   return `${valorLocal}:00-03:00`;
+}
+
+// Gravação de dia inteiro: começa à meia-noite e dura 24 horas
+export function ehDiaInteiro(inicioIso: string, fimIso: string): boolean {
+  const inicio = new Date(inicioIso);
+  const fim = new Date(fimIso);
+  return formatoHora.format(inicio) === '00:00' && fim.getTime() - inicio.getTime() === 86400000;
+}
+
+export function formatarHorario(inicioIso: string, fimIso: string): string {
+  return ehDiaInteiro(inicioIso, fimIso) ? 'Dia inteiro' : `${formatarHora(inicioIso)} às ${formatarHora(fimIso)}`;
+}
+
+// Calendário mensal
+
+export function inicioDoMes(dia: string): string {
+  return `${dia.slice(0, 7)}-01`;
+}
+
+export function somarMeses(dia: string, quantidade: number): string {
+  const [ano, mes] = dia.split('-').map(Number);
+  return new Date(Date.UTC(ano, mes - 1 + quantidade, 1)).toISOString().slice(0, 10);
+}
+
+export function formatarMes(dia: string): string {
+  return emUtc(dia).toLocaleDateString('pt-BR', { timeZone: 'UTC', month: 'long', year: 'numeric' });
+}
+
+export function numeroDoDia(dia: string): number {
+  return Number(dia.slice(8, 10));
+}
+
+// 6 semanas (42 dias) começando na segunda-feira da semana do dia 1
+export function gradeDoMes(dia: string): string[] {
+  const primeira = inicioDaSemana(inicioDoMes(dia));
+  return Array.from({ length: 42 }, (_, i) => somarDias(primeira, i));
 }

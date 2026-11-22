@@ -9,21 +9,23 @@ import { mensagemDeErro } from '../lib/api';
 import type { Equipamento, Local } from '../lib/tipos';
 import EquipamentoApi from '../services/equipamentoApi';
 import LocalApi from '../services/localApi';
+import { ListaClientes } from './CadastroClientes';
 
-type Aba = 'equipamentos' | 'locais';
+type Aba = 'equipamentos' | 'locais' | 'clientes';
 
 export default function Cadastros() {
-  const [aba, setAba] = useState<Aba>('equipamentos');
+  const [aba, setAba] = useState<Aba>('clientes');
 
   return (
     <>
       <Cabecalho />
       <h1 className="entra mt-3 text-[2rem] font-extrabold">Cadastros</h1>
-      <p className="mt-1 text-muted">Equipamentos e locais usados nas gravações.</p>
+      <p className="mt-1 text-muted">Clientes, equipamentos e locais usados nas gravações.</p>
 
-      <div role="group" aria-label="O que cadastrar" className="mt-4 grid grid-cols-2 rounded-full border border-line p-1">
+      <div role="group" aria-label="O que cadastrar" className="mt-4 grid grid-cols-3 rounded-full border border-line p-1">
         {(
           [
+            ['clientes', 'Clientes'],
             ['equipamentos', 'Equipamentos'],
             ['locais', 'Locais']
           ] as [Aba, string][]
@@ -42,7 +44,11 @@ export default function Cadastros() {
         ))}
       </div>
 
-      <div className="mt-4">{aba === 'equipamentos' ? <ListaEquipamentos /> : <ListaLocais />}</div>
+      <div className="mt-4">
+        {aba === 'clientes' && <ListaClientes />}
+        {aba === 'equipamentos' && <ListaEquipamentos />}
+        {aba === 'locais' && <ListaLocais />}
+      </div>
     </>
   );
 }

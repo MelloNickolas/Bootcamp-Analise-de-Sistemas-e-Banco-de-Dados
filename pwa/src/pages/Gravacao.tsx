@@ -3,10 +3,12 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, CalendarClock, CheckCircle2, MapPin, Plus, X } from 'lucide-react';
 import { Confirmar } from '../components/Confirmar';
 import { EstadoErro, Esqueleto } from '../components/Estados';
+import { AvatarCliente } from '../components/AvatarCliente';
 import { SeloStatus } from '../components/SeloStatus';
 import { useCarregar } from '../hooks/useCarregar';
+import { useClientes } from '../hooks/useClientes';
 import { mensagemDeErro } from '../lib/api';
-import { formatarDiaLongo, chaveDia, formatarHora } from '../lib/datas';
+import { formatarDiaLongo, chaveDia, formatarHorario } from '../lib/datas';
 import EquipamentoApi from '../services/equipamentoApi';
 import EventoApi from '../services/eventoApi';
 
@@ -19,6 +21,7 @@ export default function Gravacao() {
 
   const evento = useCarregar(() => EventoApi.obter(codigo), [codigo]);
   const equipamentos = useCarregar(() => EquipamentoApi.listar(), []);
+  const { mapa: clientes } = useClientes();
 
   const [escolhido, setEscolhido] = useState('');
   const [ocupado, setOcupado] = useState(false);
@@ -27,6 +30,7 @@ export default function Gravacao() {
   const [erroAcao, setErroAcao] = useState<string | null>(null);
 
   const dados = evento.dados;
+  const cliente = dados?.clienteID ? clientes.get(dados.clienteID) : undefined;
   const editavel = dados?.status === 'agendado';
   const jaReservados = new Set((dados?.reservas ?? []).map((r) => r.equipamentoID));
   const disponiveis = (equipamentos.dados ?? []).filter((e) => e.ativo && !jaReservados.has(e.id));
@@ -89,7 +93,13 @@ export default function Gravacao() {
 
       {dados && (
         <>
-          <section className="cartao entra mt-4 p-4">
+          <section className="cartao entra mt-4 p-4" style={cliente ? { borderLeft: `5px solid ${cliente.cor}` } : undefined}>
+            {cliente && (
+              <p className="mb-3 flex items-center gap-3 font-bold">
+                <AvatarCliente cliente={cliente} tamanho={44} />
+                {cliente.nome}
+              </p>
+            )}
             <div className="flex items-start justify-between gap-3">
               <p className="flex items-center gap-2 font-semibold first-letter:uppercase">
                 <CalendarClock size={18} className="text-accent-text" aria-hidden="true" />
@@ -97,9 +107,7 @@ export default function Gravacao() {
               </p>
               <SeloStatus status={dados.status} />
             </div>
-            <p className="mt-1 text-muted tabular-nums">
-              {formatarHora(dados.inicio)} às {formatarHora(dados.fim)}
-            </p>
+            <p className="mt-1 text-muted tabular-nums">{formatarHorario(dados.inicio, dados.fim)}</p>
             {dados.local && (
               <p className="mt-1 flex items-center gap-1.5 text-muted">
                 <MapPin size={16} aria-hidden="true" /> {dados.local}

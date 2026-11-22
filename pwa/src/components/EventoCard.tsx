@@ -1,21 +1,34 @@
 import { Link } from 'react-router-dom';
 import { ChevronRight, Clapperboard, MapPin } from 'lucide-react';
-import type { Evento } from '../lib/tipos';
-import { formatarHora } from '../lib/datas';
+import type { Cliente, Evento } from '../lib/tipos';
+import { formatarHorario } from '../lib/datas';
+import { AvatarCliente } from './AvatarCliente';
 import { SeloStatus, corDoStatus } from './SeloStatus';
 
-export function EventoCard({ evento, indice = 0 }: { evento: Evento; indice?: number }) {
+export function EventoCard({ evento, cliente, indice = 0 }: { evento: Evento; cliente?: Cliente; indice?: number }) {
   return (
-    <li className="cartao entra" style={{ animationDelay: `${indice * 40}ms` }}>
-      <Link to={`/gravacao/${evento.id}`} className="flex gap-3 p-4" aria-label={`Abrir a gravação ${evento.titulo}`}>
-        <span className="ponto mt-2" style={corDoStatus(evento.status)} aria-hidden="true" />
+    <li
+      className="cartao entra overflow-hidden"
+      style={{ animationDelay: `${indice * 40}ms`, ...(cliente ? { borderLeft: `5px solid ${cliente.cor}` } : {}) }}
+    >
+      <Link
+        to={`/gravacao/${evento.id}`}
+        className="flex gap-3 p-4"
+        aria-label={`Abrir a gravação ${evento.titulo}${cliente ? `, cliente ${cliente.nome}` : ''}`}
+      >
+        {cliente ? (
+          <AvatarCliente cliente={cliente} />
+        ) : (
+          <span className="ponto mt-2" style={corDoStatus(evento.status)} aria-hidden="true" />
+        )}
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-3">
             <h3 className="text-lg font-bold leading-snug">{evento.titulo}</h3>
             <SeloStatus status={evento.status} />
           </div>
-          <p className="mt-1 text-sm text-muted tabular-nums">
-            {formatarHora(evento.inicio)} às {formatarHora(evento.fim)}
+          {cliente && <p className="text-sm font-semibold" style={{ color: 'var(--ink)' }}>{cliente.nome}</p>}
+          <p className="mt-0.5 text-sm text-muted tabular-nums">
+            {formatarHorario(evento.inicio, evento.fim)}
             {evento.local && (
               <>
                 <span aria-hidden="true"> · </span>

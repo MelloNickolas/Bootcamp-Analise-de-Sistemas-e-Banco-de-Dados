@@ -18,11 +18,20 @@ CREATE TABLE equipamento (
     ativo      boolean NOT NULL DEFAULT true
 );
 
+-- Clientes (empresas): nome, cor e logo (imagem pequena em formato de texto, "data:image/...")
+CREATE TABLE cliente (
+    id    serial PRIMARY KEY,
+    nome  text NOT NULL UNIQUE,
+    cor   text NOT NULL DEFAULT '#D6BD87' CHECK (cor ~ '^#[0-9A-Fa-f]{6}$'),
+    logo  text
+);
+
 -- Eventos de gravação
 CREATE TABLE evento_gravacao (
-    id        serial PRIMARY KEY,
-    titulo    text NOT NULL,
-    local_id  integer NOT NULL REFERENCES local (id),
+    id         serial PRIMARY KEY,
+    titulo     text NOT NULL,
+    local_id   integer NOT NULL REFERENCES local (id),
+    cliente_id integer REFERENCES cliente (id) ON DELETE SET NULL,
     inicio    timestamptz NOT NULL,
     fim       timestamptz NOT NULL,
     status    text NOT NULL DEFAULT 'agendado'

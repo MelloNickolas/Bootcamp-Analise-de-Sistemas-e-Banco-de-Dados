@@ -4,6 +4,7 @@ import { Cabecalho } from '../components/Cabecalho';
 import { EventoCard } from '../components/EventoCard';
 import { EstadoErro, EstadoVazio, Esqueleto } from '../components/Estados';
 import { useCarregar } from '../hooks/useCarregar';
+import { useClientes } from '../hooks/useClientes';
 import { hojeIso } from '../lib/datas';
 import EventoApi from '../services/eventoApi';
 import VideoApi from '../services/videoApi';
@@ -11,6 +12,7 @@ import VideoApi from '../services/videoApi';
 export default function Inicio() {
   const semana = useCarregar(() => EventoApi.listarSemana(hojeIso()), []);
   const videos = useCarregar(() => VideoApi.listar(), []);
+  const { mapa: clientes } = useClientes();
 
   const agora = Date.now();
   const proximas = (semana.dados ?? []).filter((evento) => new Date(evento.fim).getTime() >= agora).slice(0, 4);
@@ -61,7 +63,7 @@ export default function Inicio() {
         )}
         <ul className="space-y-3">
           {proximas.map((evento, i) => (
-            <EventoCard key={evento.id} evento={evento} indice={i} />
+            <EventoCard key={evento.id} evento={evento} cliente={evento.clienteID ? clientes.get(evento.clienteID) : undefined} indice={i} />
           ))}
         </ul>
       </section>

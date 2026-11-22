@@ -10,6 +10,7 @@ public interface IEventoApplication
   Task ConcluirEventoAsync(int id);
   Task<EventoGravacao> ObterEventoPorIdAsync(int id);
   Task<IEnumerable<EventoGravacao>> ListarEventosAsync();
+  Task<IEnumerable<EventoGravacao>> ListarEventosDoMesAsync(DateOnly data);
   Task<IEnumerable<EventoGravacao>> ListarEventosDoDiaAsync(DateOnly data);
   Task<IEnumerable<EventoGravacao>> ListarEventosDaSemanaAsync(DateOnly data);
   Task<int> ReservarEquipamentoAsync(int eventoID, int equipamentoID);

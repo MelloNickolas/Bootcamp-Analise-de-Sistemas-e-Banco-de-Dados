@@ -10,6 +10,7 @@ export interface Evento {
   id: number;
   titulo: string;
   localID: number;
+  clienteID: number | null;
   local: string | null;
   inicio: string;
   fim: string;
@@ -39,4 +40,11 @@ export interface Equipamento {
   nome: string;
   descricao: string | null;
   ativo: boolean;
+}
+
+export interface Cliente {
+  id: number;
+  nome: string;
+  cor: string;
+  logo: string | null;
 }

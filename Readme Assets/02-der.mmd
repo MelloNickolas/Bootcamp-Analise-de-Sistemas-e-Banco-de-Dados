@@ -1,5 +1,6 @@
 erDiagram
     LOCAL ||--o{ EVENTO_GRAVACAO : "recebe"
+    CLIENTE |o--o{ EVENTO_GRAVACAO : "contrata"
     EVENTO_GRAVACAO ||--o{ RESERVA_EQUIPAMENTO : "tem"
     EQUIPAMENTO ||--o{ RESERVA_EQUIPAMENTO : "e reservado em"
     EVENTO_GRAVACAO |o--o{ VIDEO : "gera"
@@ -21,6 +22,7 @@ erDiagram
         int id PK
         string titulo
         int local_id FK
+        int cliente_id FK "opcional"
         timestamptz inicio
         timestamptz fim
         string status "agendado, realizado, cancelado"
@@ -58,4 +60,10 @@ erDiagram
         bool silencio_ativo
         int silencio_inicio "0 a 23"
         int silencio_fim "0 a 23"
+    }
+    CLIENTE {
+        int id PK
+        string nome
+        string cor "#RRGGBB"
+        string logo "imagem em texto"
     }

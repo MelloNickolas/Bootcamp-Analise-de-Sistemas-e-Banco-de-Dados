@@ -26,6 +26,20 @@ public static class AgendamentoHelper
     return envio < agora ? agora : envio;
   }
 
+  // Gravação de dia inteiro: começa à meia-noite (Brasília) e dura 24 horas.
+  public static bool EhDiaInteiro(DateTime inicio, DateTime fim)
+  {
+    var fuso = TimeZoneInfo.FindSystemTimeZoneById("America/Sao_Paulo");
+    var inicioLocal = TimeZoneInfo.ConvertTimeFromUtc(inicio.ToUniversalTime(), fuso);
+    return inicioLocal.TimeOfDay == TimeSpan.Zero && fim.ToUniversalTime() - inicio.ToUniversalTime() == TimeSpan.FromHours(24);
+  }
+
+  public static string DiaLocal(DateTime data)
+  {
+    var fuso = TimeZoneInfo.FindSystemTimeZoneById("America/Sao_Paulo");
+    return TimeZoneInfo.ConvertTimeFromUtc(data.ToUniversalTime(), fuso).ToString("dd/MM");
+  }
+
   // Data e hora no horário de Brasília, para as mensagens.
   public static string DataLocal(DateTime data)
   {

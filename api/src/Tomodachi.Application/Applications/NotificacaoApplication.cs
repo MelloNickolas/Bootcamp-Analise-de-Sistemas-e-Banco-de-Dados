@@ -106,6 +106,8 @@ public class NotificacaoApplication : INotificacaoApplication
 
   private static (string Titulo, string Corpo) MontarMensagem(Notificacao notificacao) => notificacao.Tipo switch
   {
+    TipoNotificacao.Gravacao when AgendamentoHelper.EhDiaInteiro(notificacao.Evento!.Inicio, notificacao.Evento.Fim) =>
+      ("Gravação em breve", $"{notificacao.Evento.Titulo} é no dia {AgendamentoHelper.DiaLocal(notificacao.Evento.Inicio)}, dia inteiro."),
     TipoNotificacao.Gravacao =>
       ("Gravação em breve", $"{notificacao.Evento?.Titulo} começa em {AgendamentoHelper.DataLocal(notificacao.Evento!.Inicio)}."),
     TipoNotificacao.PrazoEdicao =>
